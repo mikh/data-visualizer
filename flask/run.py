@@ -1,7 +1,7 @@
 """Module run launches the Flask backend."""
 
-from flask import Flask
 from flask_cors import CORS
+from flask import Flask
 
 app = Flask(__name__)
 CORS(app)

@@ -28,21 +28,9 @@ export default function Header() {
   }, []);
 
   return (
-    <header
-      style={{
-        backgroundColor: "#2c3e50",
-        color: "white",
-        padding: "1rem 2rem",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h1 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>
-        Data Visualization
-      </h1>
-      <div style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+    <header className="bg-slate-800 text-white px-8 py-4 flex justify-between items-center shadow">
+      <h1 className="m-0 text-4xl font-bold">Data Visualization</h1>
+      <div className="text-sm opacity-80">
         {loading ? "Loading version..." : error ? error : `v${version}`}
       </div>
     </header>
