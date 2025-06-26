@@ -29,7 +29,7 @@ export default function Header() {
 
   return (
     <header className="bg-slate-800 text-white px-8 py-4 flex justify-between items-center shadow">
-      <h1 className="m-0 text-4xl font-bold">Data Visualization</h1>
+      <h1 className="m-0 text-2xl font-bold">Data Visualization</h1>
       <div className="text-sm opacity-80">
         {loading ? "Loading version..." : error ? error : `v${version}`}
       </div>
