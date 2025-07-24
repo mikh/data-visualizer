@@ -68,36 +68,6 @@ def list_tree(
     return {"tree": tree, "tags": sorted(list(all_tags))}
 
 
-def create(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-    """Creates a directory or file."""
-    create_type = request_json.get("type", "")
-    if create_type not in ["dir", "file"]:
-        logger.error("create_type is not valid: %s", create_type)
-        return {"error": f"Create type is not valid: {create_type}"}
-    name = request_json.get("name", "")
-    if not name:
-        logger.error("Name cannot be empty.")
-        return {"error": "Name cannot be empty"}
-    full_path = os.path.join(tree_root, name)
-    if os.path.exists(full_path):
-        logger.error("Path %s already exists.")
-        return {"error": f"Path {full_path} already exists."}
-    logger.debug(
-        "control=%s, create_type=%s, name=%s, full_path=%s",
-        "create",
-        create_type,
-        name,
-        full_path,
-    )
-
-    if create_type == "dir":
-        os.makedirs(full_path)
-    else:
-        with open(full_path, "w", encoding="utf-8") as f:
-            json.dump({}, f)
-    return {}
-
-
 def delete(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
     """Delete a directory or file."""
     name = request_json.get("name", "")
@@ -169,25 +139,6 @@ def load(request_json: Dict[str, Any], tree_root: str) -> Dict[str, Union[str, A
     return {"data": data}
 
 
-def save(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-    """Saves a data file."""
-    dest = request_json.get("dest", "")
-    if not dest:
-        logger.error("No filename set for destination.")
-        return {"error": "No filename set for destination."}
-    dest_full = os.path.join(tree_root, dest)
-    data = request_json.get("data", "")
-    if not data:
-        logger.error("No data to save.")
-        return {"error": "No data to save."}
-    data = json.loads(data)
-    logger.debug("control=%s, dest=%s, dest_full=%s", "save", dest, dest_full)
-    logger.debug("%s", json.dumps(data))
-    with open(dest_full, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-    return {}
-
-
 def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
     """Copies a directory or file."""
     source = request_json.get("source", "")
@@ -210,5 +161,10 @@ def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
     return {}
 
 
-def upload(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
+def upload(
+    request_files: Dict[str, Any], request_json: Dict[str, Any], tree_root: str
+) -> Dict[str, str]:
     """Uploads a file to the server."""
+    print(request_files)
+    print(request_json)
+    return {}

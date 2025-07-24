@@ -20,7 +20,7 @@ def version():
         return {"version": f.read()}
 
 
-@app.route("/api/files", methods=["GET"])
+@app.route("/api/files")
 def get_files():
     """Gets the files in the current directory."""
     structure = {}
@@ -51,8 +51,8 @@ def get_files():
             rel_file_path = os.path.relpath(os.path.join(root, file), FILE_BASE_DIR)
             current[file] = {"type": "file", "full-path": rel_file_path, "tags": []}
 
-    print(structure)
     return structure
+
 
 @app.route("/api/tree", methods=["POST"])
 def tree_control():
@@ -62,8 +62,18 @@ def tree_control():
     match control:
         case "list":
             return dir_tree_lib.list_tree(FILE_BASE_DIR)
-        case 
-
+        case "delete":
+            return dir_tree_lib.delete(request.json, FILE_BASE_DIR)
+        case "move":
+            return dir_tree_lib.move(request.json, FILE_BASE_DIR)
+        case "load":
+            return dir_tree_lib.load(request.json, FILE_BASE_DIR)
+        case "copy":
+            return dir_tree_lib.copy(request.json, FILE_BASE_DIR)
+        case "upload":
+            return dir_tree_lib.upload(request.json, FILE_BASE_DIR)
+        case _:
+            return {"error": f"Invalid control: {control}"}
 
 
 if __name__ == "__main__":

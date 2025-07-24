@@ -1,53 +1,25 @@
 import Tree from "file-tree";
 import { useEffect, useState } from "react";
 
+const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
+
 export default function FileManager() {
   const [structure, setStructure] = useState(null);
   const [loaded_path, setLoadedPath] = useState(null);
   const tags = ["tag-1"];
 
   useEffect(() => {
-    fetch("/api/files")
+    fetch(`${URL_PREFIX}/api/files`)
       .then((response) => {
-        console.log(response);
-        console.log(response.json());
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         setStructure(data);
       })
       .catch((error) => console.error("Error loading file structure:", error));
-  }, []);
-
-  useEffect(() => {
-    setStructure({
-      test: {
-        type: "folder",
-        "full-path": "test",
-        children: {
-          "test.txt": {
-            type: "file",
-            "full-path": "test/test.txt",
-            tags: [],
-          },
-        },
-      },
-      test2: {
-        type: "folder",
-        "full-path": "test2",
-        children: {
-          "test-2.json": {
-            type: "file",
-            "full-path": "test-2.json",
-            tags: ["tag-1"],
-          },
-        },
-      },
-    });
   }, []);
 
   function createNewFile(path) {
