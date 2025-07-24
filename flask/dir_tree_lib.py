@@ -29,6 +29,33 @@ def get_tags(full_path: str) -> Union[List[str]]:
     return tags
 
 
+def create_folder(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
+    """Creates a folder."""
+    create_type = request_json.get("type", "")
+    if create_type not in ["dir"]:
+        logger.error("create_type is not valid: %s", create_type)
+        return {"error": f"Create type is not valid: {create_type}"}
+    name = request_json.get("name", "")
+    if not name:
+        logger.error("Name cannot be empty.")
+        return {"error": "Name cannot be empty"}
+    full_path = os.path.join(tree_root, name)
+    if os.path.exists(full_path):
+        logger.error("Path %s already exists.")
+        return {"error": f"Path {full_path} already exists."}
+    logger.debug(
+        "control=%s, create_type=%s, name=%s, full_path=%s",
+        "create",
+        create_type,
+        name,
+        full_path,
+    )
+
+    if create_type == "dir":
+        os.makedirs(full_path)
+    return {}
+
+
 def list_tree(
     tree_root: str,
 ) -> Dict[str, Union[Dict[str, Any], List[str]]]:

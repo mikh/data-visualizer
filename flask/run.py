@@ -62,6 +62,8 @@ def tree_control():
     match control:
         case "list":
             return dir_tree_lib.list_tree(FILE_BASE_DIR)
+        case "create":
+            return dir_tree_lib.create_folder(request.json, FILE_BASE_DIR)
         case "delete":
             return dir_tree_lib.delete(request.json, FILE_BASE_DIR)
         case "move":
@@ -71,7 +73,7 @@ def tree_control():
         case "copy":
             return dir_tree_lib.copy(request.json, FILE_BASE_DIR)
         case "upload":
-            return dir_tree_lib.upload(request.json, FILE_BASE_DIR)
+            return dir_tree_lib.upload(request.files, request.json, FILE_BASE_DIR)
         case _:
             return {"error": f"Invalid control: {control}"}
 

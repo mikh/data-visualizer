@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 
 const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
 
+// TODO: Use FileManagerInterface.js
+
 export default function FileManager() {
   const [structure, setStructure] = useState(null);
   const [loaded_path, setLoadedPath] = useState(null);
@@ -21,25 +23,6 @@ export default function FileManager() {
       })
       .catch((error) => console.error("Error loading file structure:", error));
   }, []);
-
-  function createNewFile(path) {
-    const new_structure = { ...structure };
-    const parts = path.split("/");
-    let current = new_structure;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]].children;
-    }
-
-    const filename = parts[parts.length - 1];
-    current[filename] = {
-      type: "file",
-      "full-path": path,
-      tags: [],
-    };
-
-    setStructure(new_structure);
-  }
 
   function createNewFolder(path) {
     const new_structure = { ...structure };
@@ -141,7 +124,7 @@ export default function FileManager() {
           treeTitle="Visualization Files"
           structure={structure}
           filterable_tags={tags}
-          createNewFile={createNewFile}
+          createNewFile={null}
           createNewFolder={createNewFolder}
           deletePath={deleteObjectPath}
           move={moveObjectPath}
