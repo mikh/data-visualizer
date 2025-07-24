@@ -3,7 +3,9 @@
 import os
 
 from flask_cors import CORS
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+
+import dir_tree_lib
 
 app = Flask(__name__)
 CORS(app)
@@ -51,6 +53,17 @@ def get_files():
 
     print(structure)
     return structure
+
+@app.route("/api/tree", methods=["POST"])
+def tree_control():
+    """Handles tree control requests."""
+    control = request.json.get("control", "")
+
+    match control:
+        case "list":
+            return dir_tree_lib.list_tree(FILE_BASE_DIR)
+        case 
+
 
 
 if __name__ == "__main__":

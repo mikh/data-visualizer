@@ -208,3 +208,7 @@ def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
     else:
         shutil.copy2(source_full, dest_full)
     return {}
+
+
+def upload(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
+    """Uploads a file to the server."""
