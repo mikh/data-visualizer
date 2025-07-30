@@ -72,10 +72,16 @@ def tree_control():
             return dir_tree_lib.load(request.json, FILE_BASE_DIR)
         case "copy":
             return dir_tree_lib.copy(request.json, FILE_BASE_DIR)
-        case "upload":
-            return dir_tree_lib.upload(request.files, request.json, FILE_BASE_DIR)
         case _:
             return {"error": f"Invalid control: {control}"}
+
+
+@app.route("/api/upload", methods=["POST"])
+def upload_file():
+    """Uploads a file."""
+    return dir_tree_lib.upload(
+        request.files["file"], request.form["path"], FILE_BASE_DIR
+    )
 
 
 if __name__ == "__main__":

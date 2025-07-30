@@ -1,5 +1,14 @@
 import Tree from "file-tree";
 import { useEffect, useState } from "react";
+import {
+  copyObject,
+  createFolder,
+  deleteObject,
+  loadObject,
+  loadTree,
+  moveObject,
+  uploadFile,
+} from "./FileManagerInterface";
 
 const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
 
@@ -7,115 +16,14 @@ const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
 
 export default function FileManager() {
   const [structure, setStructure] = useState(null);
-  const [loaded_path, setLoadedPath] = useState(null);
-  const tags = ["tag-1"];
+  const [tags, setTags] = useState([]);
+  const [loaded_file, setLoadedFile] = useState(null);
 
   useEffect(() => {
-    fetch(`${URL_PREFIX}/api/files`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setStructure(data);
-      })
-      .catch((error) => console.error("Error loading file structure:", error));
+    loadTree(setStructure, setTags);
   }, []);
 
-  function createNewFolder(path) {
-    const new_structure = { ...structure };
-    const parts = path.split("/");
-    let current = new_structure;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]].children;
-    }
-
-    const folderName = parts[parts.length - 1];
-    current[folderName] = {
-      type: "folder",
-      "full-path": path,
-      children: {},
-    };
-
-    setStructure(new_structure);
-  }
-
-  function deleteObjectPath(path) {
-    const new_structure = { ...structure };
-    const parts = path.split("/");
-    let current = new_structure;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]].children;
-    }
-
-    delete current[parts[parts.length - 1]];
-    setStructure(new_structure);
-  }
-
-  function moveObjectPath(path, new_path) {
-    const new_structure = { ...structure };
-    const parts = path.split("/");
-    let current = new_structure;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]].children;
-    }
-
-    // Get a reference to the object being moved
-    const objectToMove = current[parts[parts.length - 1]];
-
-    // Remove the object from its current location
-    delete current[parts[parts.length - 1]];
-
-    objectToMove["full-path"] = new_path;
-    current = new_structure;
-    const new_parts = new_path.split("/");
-    for (let i = 0; i < new_parts.length - 1; i++) {
-      current = current[new_parts[i]].children;
-    }
-
-    current[new_parts[new_parts.length - 1]] = objectToMove;
-
-    setStructure(new_structure);
-  }
-
-  function copyObjectPath(path, new_path) {
-    const new_structure = { ...structure };
-    const parts = path.split("/");
-    let current = new_structure;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]].children;
-    }
-
-    const objectToCopy = { ...current[parts[parts.length - 1]] };
-    objectToCopy["full-path"] = new_path;
-
-    const new_parts = new_path.split("/");
-    for (let i = 0; i < new_parts.length - 1; i++) {
-      current = current[new_parts[i]].children;
-    }
-
-    current[new_parts[new_parts.length - 1]] = objectToCopy;
-    setStructure(new_structure);
-  }
-
-  function loadObjectPath(path) {
-    const parts = path.split("/");
-    let current = structure;
-
-    for (let i = 0; i < parts.length - 1; i++) {
-      current = current[parts[i]].children;
-    }
-
-    const objectToLoad = current[parts[parts.length - 1]];
-
-    setLoadedPath(objectToLoad["full-path"]);
-  }
+  console.log("loaded file", loaded_file);
 
   return (
     <div className="w-full mt-5">
@@ -125,17 +33,15 @@ export default function FileManager() {
           structure={structure}
           filterable_tags={tags}
           createNewFile={null}
-          createNewFolder={createNewFolder}
-          deletePath={deleteObjectPath}
-          move={moveObjectPath}
-          copy={copyObjectPath}
-          load={loadObjectPath}
+          createNewFolder={(path) => createFolder(path, setStructure, setTags)}
+          deletePath={(path) => deleteObject(path, setStructure, setTags)}
+          move={(src, dst) => moveObject(src, dst, setStructure, setTags)}
+          copy={(src, dst) => copyObject(src, dst, setStructure, setTags)}
+          load={(path) => loadObject(path, setLoadedFile)}
+          uploadFile={(file, path) =>
+            uploadFile(file, path, setStructure, setTags)
+          }
         />
-      ) : null}
-      {loaded_path ? (
-        <div className="text-2xl font-bold text-center" data-cy="loaded-path">
-          Loaded Path: {loaded_path}
-        </div>
       ) : null}
     </div>
   );

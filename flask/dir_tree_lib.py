@@ -6,6 +6,8 @@ import os
 import json
 import shutil
 
+from werkzeug.utils import secure_filename
+
 import logging_helper
 
 VERBOSE = os.environ.get("VERBOSE_LOGGING", "false").lower() == "true"
@@ -189,9 +191,25 @@ def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
 
 
 def upload(
-    request_files: Dict[str, Any], request_json: Dict[str, Any], tree_root: str
+    request_files: Dict[str, Any], request_form: Dict[str, Any], tree_root: str
 ) -> Dict[str, str]:
     """Uploads a file to the server."""
-    print(request_files)
-    print(request_json)
+    if not "file" in request_files:
+        logger.error("File not found in request.")
+        return {"error": "File not found in request."}
+    if not "path" in request_form:
+        logger.error("Path not found in request.")
+        return {"error": "Path not found in request."}
+    file = request_files["file"]
+    path = request_form["path"]
+
+    if not file.filename:
+        logger.error("File has no filename.")
+        return {"error": "File has no filename."}
+
+    filename = secure_filename(file.filename)
+    full_path = os.path.join(tree_root, path)
+    file.save(full_path)
+    logger.info("Saved file %s to %s", filename, full_path)
+
     return {}
