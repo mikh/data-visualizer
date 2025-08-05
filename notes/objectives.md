@@ -26,6 +26,10 @@ functionality:
 1. Copy File
 1. Load File
 
+We need to add a layer of indirection here, since some data formats for incoming files will have the ability to store metadata, and others won't. So we will not want to make the display be one-to-one, but instead, display a metadata file, that has the actual file underneath it. When a given file is moved around, we move both the metadata file, as well as the actual file.
+
+Perhaps an easier way to solve this is by using a database which stores information and metadata. Files that are uploaded will be stored in a flat directory, and their metadata will be pushed to the database which will maintain the appearance of a folder structure in the front end.
+
 ## Display of non-graph-based data
 
 In each files, some of the fields are not in a tabular format, and usually represent metadata about
