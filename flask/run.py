@@ -79,9 +79,7 @@ def tree_control():
 @app.route("/api/upload", methods=["POST"])
 def upload_file():
     """Uploads a file."""
-    return dir_tree_lib.upload(
-        request.files["file"], request.form["path"], FILE_BASE_DIR
-    )
+    return dir_tree_lib.upload(request.files, request.form, FILE_BASE_DIR)
 
 
 if __name__ == "__main__":
