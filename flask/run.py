@@ -2,10 +2,11 @@
 
 import os
 
-from flask_cors import CORS
-from flask import Flask, jsonify, request
-
 import dir_tree_lib
+
+from flask_cors import CORS
+from flask import Flask, request
+
 
 app = Flask(__name__)
 CORS(app)
@@ -20,42 +21,8 @@ def version():
         return {"version": f.read()}
 
 
-@app.route("/api/files")
-def get_files():
-    """Gets the files in the current directory."""
-    structure = {}
-
-    for root, dirs, files in os.walk(FILE_BASE_DIR):
-        current = structure
-
-        # Skip the base dir itself
-        if root != FILE_BASE_DIR:
-            # Get relative path from base dir
-            rel_path = os.path.relpath(root, FILE_BASE_DIR)
-            path_parts = rel_path.split(os.sep)
-
-            # Build nested dict structure for folders
-            for part in path_parts:
-                if part not in current:
-                    current[part] = {
-                        "type": "folder",
-                        "full-path": os.path.join(
-                            *path_parts[: path_parts.index(part) + 1]
-                        ),
-                        "children": {},
-                    }
-                current = current[part]["children"]
-
-        # Add files at current level
-        for file in files:
-            rel_file_path = os.path.relpath(os.path.join(root, file), FILE_BASE_DIR)
-            current[file] = {"type": "file", "full-path": rel_file_path, "tags": []}
-
-    return structure
-
-
 @app.route("/api/tree", methods=["POST"])
-def tree_control():
+def tree_control():  # pylint: disable=too-many-return-statements
     """Handles tree control requests."""
     control = request.json.get("control", "")
 
