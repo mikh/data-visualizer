@@ -13,6 +13,8 @@ import logging_helper
 VERBOSE = os.environ.get("VERBOSE_LOGGING", "false").lower() == "true"
 LOG_DIRECTORY = os.environ.get("LOG_DIR", "logs")
 
+SUPPORTED_FILE_TYPES = ["csv", "json"]
+
 logger = logging_helper.init_logging(
     __name__, VERBOSE, LOG_DIRECTORY, "dir_tree_lib.log"
 )
@@ -201,11 +203,14 @@ def upload(
         logger.error("Path not found in request.")
         return {"error": "Path not found in request."}
     file = request_files["file"]
-    path = request_form["path"]
-
     if not file.filename:
         logger.error("File has no filename.")
         return {"error": "File has no filename."}
+    extension = os.path.splitext(file.filename)[1].replace(".", "").lower()
+    if extension not in SUPPORTED_FILE_TYPES:
+        logger.error("File type %s not supported.", extension)
+        return {"error": f"File type {extension} not supported."}
+    path = request_form["path"]
 
     filename = secure_filename(file.filename)
     full_path = os.path.join(tree_root, path)
