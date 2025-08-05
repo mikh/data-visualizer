@@ -12,8 +12,6 @@ import {
 
 const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
 
-// TODO: Use FileManagerInterface.js
-
 export default function FileManager() {
   const [structure, setStructure] = useState(null);
   const [tags, setTags] = useState([]);

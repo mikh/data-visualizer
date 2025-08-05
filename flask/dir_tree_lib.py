@@ -15,6 +15,11 @@ LOG_DIRECTORY = os.environ.get("LOG_DIR", "logs")
 
 SUPPORTED_FILE_TYPES = ["csv", "json"]
 
+# TODO: Move to using a database for metadata storage.
+# TODO: On upload check for supported file types.
+# TODO: On upload perform data-formats specific uploads
+# TODO: Change delete/move/copy/etc to use the database instead of the file system
+
 logger = logging_helper.init_logging(
     __name__, VERBOSE, LOG_DIRECTORY, "dir_tree_lib.log"
 )
