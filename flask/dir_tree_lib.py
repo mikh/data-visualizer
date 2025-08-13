@@ -9,9 +9,11 @@ import shutil
 from werkzeug.utils import secure_filename
 
 import logging_helper
+from db import db_interface
 
 VERBOSE = os.environ.get("VERBOSE_LOGGING", "false").lower() == "true"
 LOG_DIRECTORY = os.environ.get("LOG_DIR", "logs")
+DB_PATH = os.environ.get("DB_PATH", os.path.join("untracked", "metadata.sqlite"))
 
 SUPPORTED_FILE_TYPES = ["csv", "json"]
 
@@ -25,17 +27,10 @@ logger = logging_helper.init_logging(
 )
 
 
-def get_tags(full_path: str) -> Union[List[str]]:
-    """Gets tags from a file."""
-    try:
-        with open(full_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except json.JSONDecodeError:
-        return []
-    tags = data.get("tags", [])
-    if isinstance(tags, str):
-        tags = [x.strip() for x in tags.split(",")]
-    return tags
+def get_all_tags() -> Union[List[str]]:
+    """Gets all tags from the database."""
+    engine = db_interface.make_engine(DB_PATH)
+    return db_interface.get_tag_list(engine)
 
 
 def create_folder(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
