@@ -1,11 +1,11 @@
 """Module db_interface contains functions to interface with metadata database."""
 
-from typing import List
+from typing import List, Dict, Any
 
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 
-from db.models import Base, Tag
+from db.models import Base, Tag, FileMetadata
 
 
 def make_engine(db_path: str) -> Engine:
@@ -20,3 +20,10 @@ def get_tag_list(engine: Engine) -> List[str]:
     with Session(engine) as session:
         tags = session.query(Tag).all()
         return [tag.name for tag in tags]
+
+
+def get_file_list(engine: Engine) -> List[Dict[str, Any]]:
+    """Get a list of all files in the database."""
+    with Session(engine) as session:
+        files = session.query(FileMetadata).all()
+        return [file.to_dict() for file in files]

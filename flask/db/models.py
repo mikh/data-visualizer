@@ -1,6 +1,6 @@
 """Module models contains the models for the metadata database."""
 
-from typing import List
+from typing import List, Dict, Any
 
 from sqlalchemy import String, Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, declarative_base, relationship
@@ -31,6 +31,16 @@ class FileMetadata(Base):  # pylint: disable=too-few-public-methods
         secondary="file_tags",
         back_populates="file_metadata",
     )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "path": self.path,
+            "data_file_type": self.data_file_type,
+            "data_file_path": self.data_file_path,
+            "tags": [tag.name for tag in self.tags],
+        }
 
 
 class Tag(Base):  # pylint: disable=too-few-public-methods

@@ -27,76 +27,47 @@ logger = logging_helper.init_logging(
 )
 
 
-def get_all_tags() -> Union[List[str]]:
+def get_all_tags(db_path: str = DB_PATH) -> Union[List[str]]:
     """Gets all tags from the database."""
-    engine = db_interface.make_engine(DB_PATH)
+    engine = db_interface.make_engine(db_path)
     return db_interface.get_tag_list(engine)
 
 
-def create_folder(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-    """Creates a folder."""
-    create_type = request_json.get("type", "")
-    if create_type not in ["dir"]:
-        logger.error("create_type is not valid: %s", create_type)
-        return {"error": f"Create type is not valid: {create_type}"}
-    name = request_json.get("name", "")
-    if not name:
-        logger.error("Name cannot be empty.")
-        return {"error": "Name cannot be empty"}
-    full_path = os.path.join(tree_root, name)
-    if os.path.exists(full_path):
-        logger.error("Path %s already exists.")
-        return {"error": f"Path {full_path} already exists."}
-    logger.debug(
-        "control=%s, create_type=%s, name=%s, full_path=%s",
-        "create",
-        create_type,
-        name,
-        full_path,
-    )
-
-    if create_type == "dir":
-        os.makedirs(full_path)
-    return {}
-
-
 def list_tree(
-    tree_root: str,
+    db_path: str = DB_PATH,
 ) -> Dict[str, Union[Dict[str, Any], List[str]]]:
     """List all files and folders in the tree."""
     logger.debug("control=%s", "list")
-    tree = {}
-    all_tags = set()
 
-    def _get_folder(path: List[str]):
-        """Gets a folder from tree."""
-        cur_folder = tree
+    engine = db_interface.make_engine(db_path)
+
+    files = db_interface.get_file_list(engine)
+    tags = db_interface.get_tag_list(engine)
+
+    structure = {}
+    for file in files:
+        path = file["path"].split("/")
+        cur_folder = structure
+        cur_path = ""
         for folder in path:
+            if cur_path:
+                cur_path = os.path.join(cur_path, folder)
+            else:
+                cur_path = folder
+            if not folder in cur_folder:
+                cur_folder[folder] = {
+                    "type": "folder",
+                    "full-path": cur_path,
+                    "children": {},
+                }
             cur_folder = cur_folder[folder]["children"]
-        return cur_folder
+        cur_folder[file["name"]] = {
+            "type": "file",
+            "full-path": file["id"],
+            "tags": file["tags"],
+        }
 
-    for root, dirs, files in os.walk(tree_root):
-        pruned_root = root[len(tree_root) + 1 :]
-        pruned_root = [x.strip() for x in pruned_root.split("/") if x.strip()]
-
-        target_folder = _get_folder(pruned_root)
-        for directory in dirs:
-            full_path = os.path.join(root, directory)
-            target_folder[directory] = {
-                "type": "folder",
-                "full-path": full_path,
-                "children": {},
-            }
-        for file in files:
-            full_path = os.path.join(root, file)
-            tags = [x.strip() for x in get_tags(full_path) if x.strip()]
-            all_tags.update(tags)
-            target_folder[file] = {
-                "type": "file",
-                "full-path": full_path,
-                "tags": tags,
-            }
-    return {"tree": tree, "tags": sorted(list(all_tags))}
+    return {"tree": structure, "tags": tags}
 
 
 def delete(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
