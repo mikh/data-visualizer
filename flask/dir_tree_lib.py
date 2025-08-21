@@ -6,6 +6,8 @@ import os
 import json
 import shutil
 
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 from werkzeug.utils import secure_filename
 
 import logging_helper
@@ -27,19 +29,16 @@ logger = logging_helper.init_logging(
 )
 
 
-def get_all_tags(db_path: str = DB_PATH) -> Union[List[str]]:
+def get_all_tags(engine: Engine) -> Union[List[str]]:
     """Gets all tags from the database."""
-    engine = db_interface.make_engine(db_path)
     return db_interface.get_tag_list(engine)
 
 
 def list_tree(
-    db_path: str = DB_PATH,
+    engine: Engine,
 ) -> Dict[str, Union[Dict[str, Any], List[str]]]:
     """List all files and folders in the tree."""
     logger.debug("control=%s", "list")
-
-    engine = db_interface.make_engine(db_path)
 
     files = db_interface.get_file_list(engine)
     tags = db_interface.get_tag_list(engine)
@@ -49,7 +48,7 @@ def list_tree(
         path = file["path"].split("/")
         cur_folder = structure
         cur_path = ""
-        for folder in path:
+        for folder in path[:-1]:
             if cur_path:
                 cur_path = os.path.join(cur_path, folder)
             else:
@@ -61,13 +60,34 @@ def list_tree(
                     "children": {},
                 }
             cur_folder = cur_folder[folder]["children"]
-        cur_folder[file["name"]] = {
+        cur_folder[path[-1]] = {
             "type": "file",
-            "full-path": file["id"],
+            "full-path": file["path"],
             "tags": file["tags"],
         }
 
     return {"tree": structure, "tags": tags}
+
+
+def delete(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+    """Delete a file."""
+    path = request_json.get("path", "")
+    if not path:
+        logger.error("Path cannot be empty.")
+        return {"error": "Path cannot be empty."}
+    logger.debug("control=%s, path=%s", "delete", path)
+    with Session(engine) as session:
+        file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", path
+        )
+        data_file_path = file_metadata.data_file_path
+        # TODO: Delete the data file as well
+    if file_metadata is None:
+        logger.error("File metadata not found for path %s.", path)
+        return {"error": f"File metadata not found for path {path}."}
+    session.delete(file_metadata)
+    session.commit()
+    return {}
 
 
 def delete(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:

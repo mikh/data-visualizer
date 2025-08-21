@@ -33,6 +33,7 @@ class FileMetadata(Base):  # pylint: disable=too-few-public-methods
     )
 
     def to_dict(self) -> Dict[str, Any]:
+        """Convert the file metadata to a dictionary."""
         return {
             "id": self.id,
             "name": self.name,
@@ -56,3 +57,10 @@ class Tag(Base):  # pylint: disable=too-few-public-methods
         secondary="file_tags",
         back_populates="tags",
     )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the tag to a dictionary."""
+        return {
+            "id": self.id,
+            "name": self.name,
+        }
