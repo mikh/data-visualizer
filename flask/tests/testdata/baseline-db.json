@@ -4,15 +4,22 @@
       "name": "test-file-1",
       "path": "test-folder-1/test-file-1",
       "data_file_type": "csv",
-      "data_file_path": "some/path/to/test-file-1.csv",
+      "data_file_path": "test-file-1.csv",
       "tags": ["tag-1", "tag-2"]
     },
     {
       "name": "test-file-2",
       "path": "test-file-2",
       "data_file_type": "json",
-      "data_file_path": "some/path/to/test-file-2.json",
+      "data_file_path": "data-folder-1/test-file-2.json",
       "tags": ["tag-1"]
+    },
+    {
+      "name": "test-file-3",
+      "path": "test-folder-1/test-file-3",
+      "data_file_type": "json",
+      "data_file_path": "fake-file.json",
+      "tags": []
     }
   ]
 }

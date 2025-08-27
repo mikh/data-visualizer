@@ -43,7 +43,7 @@ def test_get_file_list():
             "name": "test-file-1",
             "path": "test-folder-1/test-file-1",
             "data_file_type": "csv",
-            "data_file_path": "some/path/to/test-file-1.csv",
+            "data_file_path": "test-file-1.csv",
             "tags": ["tag-1", "tag-2"],
         },
         {
@@ -51,8 +51,16 @@ def test_get_file_list():
             "name": "test-file-2",
             "path": "test-file-2",
             "data_file_type": "json",
-            "data_file_path": "some/path/to/test-file-2.json",
+            "data_file_path": "data-folder-1/test-file-2.json",
             "tags": ["tag-1"],
+        },
+        {
+            "id": 3,
+            "name": "test-file-3",
+            "path": "test-folder-1/test-file-3",
+            "data_file_type": "json",
+            "data_file_path": "fake-file.json",
+            "tags": [],
         },
     ]
 
@@ -73,32 +81,32 @@ def test_get_file_list():
                 "name": "test-file-1",
                 "path": "test-folder-1/test-file-1",
                 "data_file_type": "csv",
-                "data_file_path": "some/path/to/test-file-1.csv",
+                "data_file_path": "test-file-1.csv",
                 "tags": ["tag-1", "tag-2"],
             },
             {
-                "file_metadata": 2,
+                "file_metadata": 3,
                 "tag": 2,
                 "file_tags": 3,
             },
         ),
         (
             {
-                "name": "test-file-3",
-                "path": "test-folder-2/test-file-3",
+                "name": "test-file-4",
+                "path": "test-folder-2/test-file-4",
                 "data_file_type": "json",
                 "data_file_path": "some/path/to/test-file-3.json",
                 "tags": ["tag-3"],
             },
             {
-                "id": 3,
-                "name": "test-file-3",
-                "path": "test-folder-2/test-file-3",
+                "id": 4,
+                "name": "test-file-4",
+                "path": "test-folder-2/test-file-4",
                 "data_file_type": "json",
                 "data_file_path": "some/path/to/test-file-3.json",
                 "tags": ["tag-3"],
             },
-            {"file_metadata": 3, "tag": 3, "file_tags": 4},
+            {"file_metadata": 4, "tag": 3, "file_tags": 4},
         ),
     ],
     ids=["existing-file", "new-file"],
@@ -124,12 +132,12 @@ def test_create_or_get_file_metadata(
         (
             "tag-1",
             {"id": 1, "name": "tag-1"},
-            {"file_metadata": 2, "tag": 2, "file_tags": 3},
+            {"file_metadata": 3, "tag": 2, "file_tags": 3},
         ),
         (
             "tag-4",
             {"id": 3, "name": "tag-4"},
-            {"file_metadata": 2, "tag": 3, "file_tags": 3},
+            {"file_metadata": 3, "tag": 3, "file_tags": 3},
         ),
     ],
     ids=["existing-tag", "new-tag"],
@@ -162,7 +170,7 @@ def test_mass_add_objects():
         session.commit()
 
     assert db_interface.get_object_counts(engine) == {
-        "file_metadata": 2,
+        "file_metadata": 3,
         "tag": 2,
         "file_tags": 3,
     }
@@ -172,7 +180,7 @@ def test_get_object_counts():
     """Tests the get_object_counts function."""
     engine = make_test_db()
     assert db_interface.get_object_counts(engine) == {
-        "file_metadata": 2,
+        "file_metadata": 3,
         "tag": 2,
         "file_tags": 3,
     }
@@ -190,7 +198,7 @@ def test_get_object_counts():
                 "name": "test-file-1",
                 "path": "test-folder-1/test-file-1",
                 "data_file_type": "csv",
-                "data_file_path": "some/path/to/test-file-1.csv",
+                "data_file_path": "test-file-1.csv",
                 "tags": ["tag-1", "tag-2"],
             },
         ),

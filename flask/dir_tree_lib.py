@@ -14,8 +14,9 @@ import logging_helper
 from db import db_interface
 
 VERBOSE = os.environ.get("VERBOSE_LOGGING", "false").lower() == "true"
-LOG_DIRECTORY = os.environ.get("LOG_DIR", "logs")
+LOG_DIRECTORY = os.environ.get("LOG_DIR", os.path.join("flask", "untracked", "logs"))
 DB_PATH = os.environ.get("DB_PATH", os.path.join("untracked", "metadata.sqlite"))
+DATA_FILE_DIR = os.environ.get("DATA_FILE_DIR", os.path.join("untracked", "data"))
 
 SUPPORTED_FILE_TYPES = ["csv", "json"]
 
@@ -69,7 +70,11 @@ def list_tree(
     return {"tree": structure, "tags": tags}
 
 
-def delete(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+def delete(
+    engine: Engine,
+    request_json: Dict[str, Any],
+    data_file_dir: str = DATA_FILE_DIR,
+) -> Dict[str, str]:
     """Delete a file."""
     path = request_json.get("path", "")
     if not path:
@@ -80,132 +85,140 @@ def delete(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
         file_metadata = db_interface.get_db_object_by_key(
             session, "file_metadata", "path", path
         )
+
+        if file_metadata is None:
+            logger.error("File metadata not found for path %s.", path)
+            return {"error": f"File metadata not found for path {path}."}
+
         data_file_path = file_metadata.data_file_path
-        # TODO: Delete the data file as well
-    if file_metadata is None:
-        logger.error("File metadata not found for path %s.", path)
-        return {"error": f"File metadata not found for path {path}."}
+        data_file_full_path = os.path.join(data_file_dir, data_file_path)
+        if not os.path.exists(data_file_full_path):
+            logger.error("Data file not found for path %s.", data_file_path)
+            return {"error": f"Data file not found for path {data_file_path}."}
+        os.remove(data_file_full_path)
+        logger.info("Deleted data file %s.", data_file_full_path)
+
     session.delete(file_metadata)
     session.commit()
     return {}
 
 
-def delete(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-    """Delete a directory or file."""
-    name = request_json.get("name", "")
-    full_path = os.path.join(tree_root, name)
-    delete_type = ""
-    if os.path.isdir(full_path):
-        delete_type = "dir"
-    elif os.path.isfile(full_path):
-        delete_type = "file"
-    else:
-        logger.error("Path %s does not exist.", full_path)
-        return {"error": f"Path {full_path} does not exist."}
-    logger.debug(
-        "control=%s, delete_type=%s, name=%s, full_path=%s",
-        "delete",
-        delete_type,
-        name,
-        full_path,
-    )
-    if delete_type == "dir":
-        shutil.rmtree(full_path)
-    else:
-        os.remove(full_path)
-    return {}
+# def delete(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
+#     """Delete a directory or file."""
+#     name = request_json.get("name", "")
+#     full_path = os.path.join(tree_root, name)
+#     delete_type = ""
+#     if os.path.isdir(full_path):
+#         delete_type = "dir"
+#     elif os.path.isfile(full_path):
+#         delete_type = "file"
+#     else:
+#         logger.error("Path %s does not exist.", full_path)
+#         return {"error": f"Path {full_path} does not exist."}
+#     logger.debug(
+#         "control=%s, delete_type=%s, name=%s, full_path=%s",
+#         "delete",
+#         delete_type,
+#         name,
+#         full_path,
+#     )
+#     if delete_type == "dir":
+#         shutil.rmtree(full_path)
+#     else:
+#         os.remove(full_path)
+#     return {}
 
 
-def move(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-    """Moves a directory or file."""
-    source = request_json.get("source", "")
-    source_full = os.path.join(tree_root, source)
-    if not os.path.exists(source_full):
-        logger.error("Path %s does not exist.", source_full)
-        return {"error": f"Path {source_full} does not exist."}
+# def move(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
+#     """Moves a directory or file."""
+#     source = request_json.get("source", "")
+#     source_full = os.path.join(tree_root, source)
+#     if not os.path.exists(source_full):
+#         logger.error("Path %s does not exist.", source_full)
+#         return {"error": f"Path {source_full} does not exist."}
 
-    dest = request_json.get("dest", "")
-    if not dest:
-        logger.error("Dest path cannot be empty.")
-        return {"error": "Dest path cannot be empty."}
-    dest_full = os.path.join(tree_root, dest)
-    if os.path.exists(dest_full):
-        logger.error("Dest path %s already exists", dest_full)
-        return {"error": f"Dest path {dest_full} already exists."}
+#     dest = request_json.get("dest", "")
+#     if not dest:
+#         logger.error("Dest path cannot be empty.")
+#         return {"error": "Dest path cannot be empty."}
+#     dest_full = os.path.join(tree_root, dest)
+#     if os.path.exists(dest_full):
+#         logger.error("Dest path %s already exists", dest_full)
+#         return {"error": f"Dest path {dest_full} already exists."}
 
-    logger.debug(
-        "control=%s, source=%s, source_full=%s, dest=%s, dest_full=%s",
-        "move",
-        source,
-        source_full,
-        dest,
-        dest_full,
-    )
-    shutil.move(source_full, dest_full)
-    return {}
-
-
-def load(request_json: Dict[str, Any], tree_root: str) -> Dict[str, Union[str, Any]]:
-    """Loads a data file."""
-    source = request_json.get("source", "")
-    source_full = os.path.join(tree_root, source)
-    if not os.path.exists(source_full):
-        logger.error("Path %s does not exist.", source_full)
-        return {"error": f"Path {source_full} does not exist."}
-
-    logger.debug("control=%s, source=%s, source_full=%s", "load", source, source_full)
-    with open(source_full, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    data["source_file"] = source
-    logger.debug("%s", json.dumps(data))
-    return {"data": data}
+#     logger.debug(
+#         "control=%s, source=%s, source_full=%s, dest=%s, dest_full=%s",
+#         "move",
+#         source,
+#         source_full,
+#         dest,
+#         dest_full,
+#     )
+#     shutil.move(source_full, dest_full)
+#     return {}
 
 
-def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-    """Copies a directory or file."""
-    source = request_json.get("source", "")
-    source_full = os.path.join(tree_root, source)
-    if not os.path.exists(source_full):
-        logger.error("Path %s does not exist.", source_full)
-        return {"error": f"Path {source_full} does not exist."}
-    dest = request_json.get("dest", "")
-    if not dest:
-        logger.error("Dest path cannot be empty.")
-        return {"error": "Dest path cannot be empty."}
-    dest_full = os.path.join(tree_root, dest)
-    if os.path.exists(dest_full):
-        logger.error("Dest path %s already exists", dest_full)
-        return {"error": f"Dest path {dest_full} already exists"}
-    if os.path.isdir(source_full):
-        shutil.copytree(source_full, dest_full)
-    else:
-        shutil.copy2(source_full, dest_full)
-    return {}
+# def load(request_json: Dict[str, Any], tree_root: str) -> Dict[str, Union[str, Any]]:
+#     """Loads a data file."""
+#     source = request_json.get("source", "")
+#     source_full = os.path.join(tree_root, source)
+#     if not os.path.exists(source_full):
+#         logger.error("Path %s does not exist.", source_full)
+#         return {"error": f"Path {source_full} does not exist."}
+
+#     logger.debug("control=%s, source=%s, source_full=%s", "load", source, source_full)
+#     with open(source_full, "r", encoding="utf-8") as f:
+#         data = json.load(f)
+#     data["source_file"] = source
+#     logger.debug("%s", json.dumps(data))
+#     return {"data": data}
 
 
-def upload(
-    request_files: Dict[str, Any], request_form: Dict[str, Any], tree_root: str
-) -> Dict[str, str]:
-    """Uploads a file to the server."""
-    if not "file" in request_files:
-        logger.error("File not found in request.")
-        return {"error": "File not found in request."}
-    if not "path" in request_form:
-        logger.error("Path not found in request.")
-        return {"error": "Path not found in request."}
-    file = request_files["file"]
-    if not file.filename:
-        logger.error("File has no filename.")
-        return {"error": "File has no filename."}
-    extension = os.path.splitext(file.filename)[1].replace(".", "").lower()
-    if extension not in SUPPORTED_FILE_TYPES:
-        logger.error("File type %s not supported.", extension)
-        return {"error": f"File type {extension} not supported."}
-    path = request_form["path"]
+# def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
+#     """Copies a directory or file."""
+#     source = request_json.get("source", "")
+#     source_full = os.path.join(tree_root, source)
+#     if not os.path.exists(source_full):
+#         logger.error("Path %s does not exist.", source_full)
+#         return {"error": f"Path {source_full} does not exist."}
+#     dest = request_json.get("dest", "")
+#     if not dest:
+#         logger.error("Dest path cannot be empty.")
+#         return {"error": "Dest path cannot be empty."}
+#     dest_full = os.path.join(tree_root, dest)
+#     if os.path.exists(dest_full):
+#         logger.error("Dest path %s already exists", dest_full)
+#         return {"error": f"Dest path {dest_full} already exists"}
+#     if os.path.isdir(source_full):
+#         shutil.copytree(source_full, dest_full)
+#     else:
+#         shutil.copy2(source_full, dest_full)
+#     return {}
 
-    filename = secure_filename(file.filename)
-    full_path = os.path.join(tree_root, path)
-    file.save(full_path)
-    logger.info("Saved file %s to %s", filename, full_path)
 
-    return {}
+# def upload(
+#     request_files: Dict[str, Any], request_form: Dict[str, Any], tree_root: str
+# ) -> Dict[str, str]:
+#     """Uploads a file to the server."""
+#     if not "file" in request_files:
+#         logger.error("File not found in request.")
+#         return {"error": "File not found in request."}
+#     if not "path" in request_form:
+#         logger.error("Path not found in request.")
+#         return {"error": "Path not found in request."}
+#     file = request_files["file"]
+#     if not file.filename:
+#         logger.error("File has no filename.")
+#         return {"error": "File has no filename."}
+#     extension = os.path.splitext(file.filename)[1].replace(".", "").lower()
+#     if extension not in SUPPORTED_FILE_TYPES:
+#         logger.error("File type %s not supported.", extension)
+#         return {"error": f"File type {extension} not supported."}
+#     path = request_form["path"]
+
+#     filename = secure_filename(file.filename)
+#     full_path = os.path.join(tree_root, path)
+#     file.save(full_path)
+#     logger.info("Saved file %s to %s", filename, full_path)
+
+#     return {}
