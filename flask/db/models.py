@@ -40,8 +40,12 @@ class FileMetadata(Base):  # pylint: disable=too-few-public-methods
             "path": self.path,
             "data_file_type": self.data_file_type,
             "data_file_path": self.data_file_path,
-            "tags": [tag.name for tag in self.tags],
+            "tags": self.get_tags(),
         }
+
+    def get_tags(self) -> List[str]:
+        """Get the tags for the file metadata."""
+        return [tag.name for tag in self.tags]
 
 
 class Tag(Base):  # pylint: disable=too-few-public-methods

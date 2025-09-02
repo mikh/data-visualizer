@@ -20,6 +20,13 @@
       "data_file_type": "json",
       "data_file_path": "fake-file.json",
       "tags": []
+    },
+    {
+      "name": "test-file-4",
+      "path": "test-folder-2/test-file-4",
+      "data_file_type": "fake-data-type",
+      "data_file_path": "test-file-1.csv",
+      "tags": []
     }
   ]
 }

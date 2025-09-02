@@ -35,6 +35,17 @@ _BASE_STRUCTURE = {
                 },
             },
         },
+        "test-folder-2": {
+            "type": "folder",
+            "full-path": "test-folder-2",
+            "children": {
+                "test-file-4": {
+                    "type": "file",
+                    "full-path": "test-folder-2/test-file-4",
+                    "tags": [],
+                },
+            },
+        },
         "test-file-2": {
             "type": "file",
             "full-path": "test-file-2",
@@ -129,6 +140,17 @@ def test_list_tree():
                             },
                         },
                     },
+                    "test-folder-2": {
+                        "type": "folder",
+                        "full-path": "test-folder-2",
+                        "children": {
+                            "test-file-4": {
+                                "type": "file",
+                                "full-path": "test-folder-2/test-file-4",
+                                "tags": [],
+                            },
+                        },
+                    },
                     "test-file-2": {
                         "type": "file",
                         "full-path": "test-file-2",
@@ -165,6 +187,241 @@ def test_delete(
     assert response == want_response
     assert dir_tree_lib.list_tree(engine) == want_structure
     assert get_all_files(TEST_DATA_FILE_DIR) == want_data_files
+
+
+@pytest.mark.parametrize(
+    "request_json, want_response, want_structure",
+    [
+        ({}, {"error": "Source path cannot be empty."}, _BASE_STRUCTURE),
+        (
+            {"source": "fake-source"},
+            {"error": "Dest path cannot be empty."},
+            _BASE_STRUCTURE,
+        ),
+        (
+            {"source": "fake-source", "dest": "test-folder-1/test-file-1"},
+            {"error": "Source file metadata not found for path fake-source."},
+            _BASE_STRUCTURE,
+        ),
+        (
+            {
+                "source": "test-folder-1/test-file-1",
+                "dest": "test-folder-1/test-file-1",
+            },
+            {
+                "error": "Dest file metadata already exists for path test-folder-1/test-file-1."
+            },
+            _BASE_STRUCTURE,
+        ),
+        (
+            {
+                "source": "test-folder-1/test-file-1",
+                "dest": "test-folder-2/test-file-1",
+            },
+            {},
+            {
+                "tree": {
+                    "test-folder-1": {
+                        "type": "folder",
+                        "full-path": "test-folder-1",
+                        "children": {
+                            "test-file-3": {
+                                "type": "file",
+                                "full-path": "test-folder-1/test-file-3",
+                                "tags": [],
+                            },
+                        },
+                    },
+                    "test-folder-2": {
+                        "type": "folder",
+                        "full-path": "test-folder-2",
+                        "children": {
+                            "test-file-1": {
+                                "type": "file",
+                                "full-path": "test-folder-2/test-file-1",
+                                "tags": ["tag-1", "tag-2"],
+                            },
+                            "test-file-4": {
+                                "type": "file",
+                                "full-path": "test-folder-2/test-file-4",
+                                "tags": [],
+                            },
+                        },
+                    },
+                    "test-file-2": {
+                        "type": "file",
+                        "full-path": "test-file-2",
+                        "tags": ["tag-1"],
+                    },
+                },
+                "tags": ["tag-1", "tag-2"],
+            },
+        ),
+    ],
+    ids=[
+        "empty-source-gives-error",
+        "empty-dest-gives-error",
+        "bad-source-gives-error",
+        "bad-dest-gives-error",
+        "move-file",
+    ],
+)
+def test_move(
+    request_json: Dict[str, Any],
+    want_response: Dict[str, str],
+    want_structure: Dict[str, Any],
+):
+    """Test the move function."""
+    engine = make_test_db()
+    response = dir_tree_lib.move(engine, request_json)
+    assert response == want_response
+    assert dir_tree_lib.list_tree(engine) == want_structure
+
+
+@pytest.mark.parametrize(
+    "request_json, want_response, want_structure",
+    [
+        ({}, {"error": "Source path cannot be empty."}, _BASE_STRUCTURE),
+        (
+            {"source": "fake-source"},
+            {"error": "Dest path cannot be empty."},
+            _BASE_STRUCTURE,
+        ),
+        (
+            {"source": "fake-source", "dest": "test-folder-1/test-file-1"},
+            {"error": "Source file metadata not found for path fake-source."},
+            _BASE_STRUCTURE,
+        ),
+        (
+            {
+                "source": "test-folder-1/test-file-1",
+                "dest": "test-folder-1/test-file-1",
+            },
+            {
+                "error": "Dest file metadata already exists for path test-folder-1/test-file-1."
+            },
+            _BASE_STRUCTURE,
+        ),
+        (
+            {
+                "source": "test-folder-1/test-file-1",
+                "dest": "test-folder-2/test-file-1",
+            },
+            {},
+            {
+                "tree": {
+                    "test-folder-1": {
+                        "type": "folder",
+                        "full-path": "test-folder-1",
+                        "children": {
+                            "test-file-1": {
+                                "type": "file",
+                                "full-path": "test-folder-1/test-file-1",
+                                "tags": ["tag-1", "tag-2"],
+                            },
+                            "test-file-3": {
+                                "type": "file",
+                                "full-path": "test-folder-1/test-file-3",
+                                "tags": [],
+                            },
+                        },
+                    },
+                    "test-folder-2": {
+                        "type": "folder",
+                        "full-path": "test-folder-2",
+                        "children": {
+                            "test-file-1": {
+                                "type": "file",
+                                "full-path": "test-folder-2/test-file-1",
+                                "tags": ["tag-1", "tag-2"],
+                            },
+                            "test-file-4": {
+                                "type": "file",
+                                "full-path": "test-folder-2/test-file-4",
+                                "tags": [],
+                            },
+                        },
+                    },
+                    "test-file-2": {
+                        "type": "file",
+                        "full-path": "test-file-2",
+                        "tags": ["tag-1"],
+                    },
+                },
+                "tags": ["tag-1", "tag-2"],
+            },
+        ),
+    ],
+    ids=[
+        "empty-source-gives-error",
+        "empty-dest-gives-error",
+        "bad-source-gives-error",
+        "bad-dest-gives-error",
+        "copy-file",
+    ],
+)
+def test_copy(
+    request_json: Dict[str, Any],
+    want_response: Dict[str, str],
+    want_structure: Dict[str, Any],
+):
+    """Test the move function."""
+    engine = make_test_db()
+    response = dir_tree_lib.copy(engine, request_json)
+    assert response == want_response
+    assert dir_tree_lib.list_tree(engine) == want_structure
+
+
+@pytest.mark.parametrize(
+    "request_json, want_response",
+    [
+        ({}, {"error": "Path cannot be empty."}),
+        (
+            {"path": "fake-path"},
+            {"error": "File metadata not found for path fake-path."},
+        ),
+        (
+            {"path": "test-folder-1/test-file-3"},
+            {"error": "Data file not found for path fake-file.json."},
+        ),
+        (
+            {"path": "test-folder-2/test-file-4"},
+            {"error": "Unsupported data file type: fake-data-type."},
+        ),
+        (
+            {"path": "test-folder-1/test-file-1"},
+            {
+                "id": 1,
+                "name": "test-file-1",
+                "path": "test-folder-1/test-file-1",
+                "data_file_type": "csv",
+                "data_file_path": "test-file-1.csv",
+                "tags": ["tag-1", "tag-2"],
+                "data": [
+                    ["column-1", "column-2"],
+                    ["value-1", "value-2"],
+                    ["value-3", "value-4"],
+                ],
+            },
+        ),
+    ],
+    ids=[
+        "empty-path-gives-error",
+        "bad-path-gives-error",
+        "bad-data-file-path-gives-error",
+        "bad-data-file-type-gives-error",
+        "load-file",
+    ],
+)
+def test_load(request_json: Dict[str, Any], want_response: Dict[str, Any]):
+    """Test the load function."""
+    engine = make_test_db()
+    create_test_data_files(
+        os.path.join(TESTDATA_DIR, "baseline"),
+        TEST_DATA_FILE_DIR,
+    )
+    response = dir_tree_lib.load(engine, request_json, data_file_dir=TEST_DATA_FILE_DIR)
+    assert response == want_response
 
 
 if __name__ == "__main__":

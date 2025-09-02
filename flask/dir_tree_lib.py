@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 
 import logging_helper
 from db import db_interface
+from db import data_interface
 
 VERBOSE = os.environ.get("VERBOSE_LOGGING", "false").lower() == "true"
 LOG_DIRECTORY = os.environ.get("LOG_DIR", os.path.join("flask", "untracked", "logs"))
@@ -98,64 +99,108 @@ def delete(
         os.remove(data_file_full_path)
         logger.info("Deleted data file %s.", data_file_full_path)
 
-    session.delete(file_metadata)
-    session.commit()
+        session.delete(file_metadata)
+        session.commit()
     return {}
 
 
-# def delete(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-#     """Delete a directory or file."""
-#     name = request_json.get("name", "")
-#     full_path = os.path.join(tree_root, name)
-#     delete_type = ""
-#     if os.path.isdir(full_path):
-#         delete_type = "dir"
-#     elif os.path.isfile(full_path):
-#         delete_type = "file"
-#     else:
-#         logger.error("Path %s does not exist.", full_path)
-#         return {"error": f"Path {full_path} does not exist."}
-#     logger.debug(
-#         "control=%s, delete_type=%s, name=%s, full_path=%s",
-#         "delete",
-#         delete_type,
-#         name,
-#         full_path,
-#     )
-#     if delete_type == "dir":
-#         shutil.rmtree(full_path)
-#     else:
-#         os.remove(full_path)
-#     return {}
+def move(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+    """Moves a file."""
+    source = request_json.get("source", "")
+    dest = request_json.get("dest", "")
+    if not source:
+        logger.error("Source path cannot be empty.")
+        return {"error": "Source path cannot be empty."}
+    if not dest:
+        logger.error("Dest path cannot be empty.")
+        return {"error": "Dest path cannot be empty."}
+    logger.debug("control=%s, source=%s, dest=%s", "move", source, dest)
+    with Session(engine) as session:
+        source_file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", source
+        )
+        if source_file_metadata is None:
+            logger.error("Source file metadata not found for path %s.", source)
+            return {"error": f"Source file metadata not found for path {source}."}
+        dest_file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", dest
+        )
+        if dest_file_metadata is not None:
+            logger.error("Dest file metadata already exists for path %s.", dest)
+            return {"error": f"Dest file metadata already exists for path {dest}."}
+        source_file_metadata.path = dest
+        session.commit()
+    return {}
 
 
-# def move(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-#     """Moves a directory or file."""
-#     source = request_json.get("source", "")
-#     source_full = os.path.join(tree_root, source)
-#     if not os.path.exists(source_full):
-#         logger.error("Path %s does not exist.", source_full)
-#         return {"error": f"Path {source_full} does not exist."}
+def copy(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+    """Moves a file."""
+    source = request_json.get("source", "")
+    dest = request_json.get("dest", "")
+    if not source:
+        logger.error("Source path cannot be empty.")
+        return {"error": "Source path cannot be empty."}
+    if not dest:
+        logger.error("Dest path cannot be empty.")
+        return {"error": "Dest path cannot be empty."}
+    logger.debug("control=%s, source=%s, dest=%s", "move", source, dest)
+    with Session(engine) as session:
+        source_file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", source
+        )
+        if source_file_metadata is None:
+            logger.error("Source file metadata not found for path %s.", source)
+            return {"error": f"Source file metadata not found for path {source}."}
+        dest_file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", dest
+        )
+        if dest_file_metadata is not None:
+            logger.error("Dest file metadata already exists for path %s.", dest)
+            return {"error": f"Dest file metadata already exists for path {dest}."}
+        db_interface.create_or_get_file_metadata(
+            session,
+            {
+                "path": dest,
+                "name": source_file_metadata.name,
+                "data_file_type": source_file_metadata.data_file_type,
+                "data_file_path": source_file_metadata.data_file_path,
+                "tags": source_file_metadata.get_tags(),
+            },
+        )
+        session.commit()
+    return {}
 
-#     dest = request_json.get("dest", "")
-#     if not dest:
-#         logger.error("Dest path cannot be empty.")
-#         return {"error": "Dest path cannot be empty."}
-#     dest_full = os.path.join(tree_root, dest)
-#     if os.path.exists(dest_full):
-#         logger.error("Dest path %s already exists", dest_full)
-#         return {"error": f"Dest path {dest_full} already exists."}
 
-#     logger.debug(
-#         "control=%s, source=%s, source_full=%s, dest=%s, dest_full=%s",
-#         "move",
-#         source,
-#         source_full,
-#         dest,
-#         dest_full,
-#     )
-#     shutil.move(source_full, dest_full)
-#     return {}
+def load(
+    engine: Engine, request_json: Dict[str, Any], data_file_dir: str = DATA_FILE_DIR
+) -> Dict[str, Union[str, Any]]:
+    """Loads a data file."""
+    path = request_json.get("path", "")
+    if not path:
+        logger.error("Path cannot be empty.")
+        return {"error": "Path cannot be empty."}
+    logger.debug("control=%s, path=%s", "load", path)
+    with Session(engine) as session:
+        file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", path
+        )
+        if file_metadata is None:
+            logger.error("File metadata not found for path %s.", path)
+            return {"error": f"File metadata not found for path {path}."}
+        data_file_path = file_metadata.data_file_path
+        data_file_full_path = os.path.join(data_file_dir, data_file_path)
+
+        if not os.path.exists(data_file_full_path):
+            logger.error("Data file not found for path %s.", data_file_path)
+            return {"error": f"Data file not found for path {data_file_path}."}
+
+        data, error = data_interface.load_data_file(
+            data_file_path, file_metadata.data_file_type, data_file_dir
+        )
+        if error:
+            logger.error(error)
+            return {"error": error}
+        return {**file_metadata.to_dict(), "data": data}
 
 
 # def load(request_json: Dict[str, Any], tree_root: str) -> Dict[str, Union[str, Any]]:
@@ -172,28 +217,6 @@ def delete(
 #     data["source_file"] = source
 #     logger.debug("%s", json.dumps(data))
 #     return {"data": data}
-
-
-# def copy(request_json: Dict[str, Any], tree_root: str) -> Dict[str, str]:
-#     """Copies a directory or file."""
-#     source = request_json.get("source", "")
-#     source_full = os.path.join(tree_root, source)
-#     if not os.path.exists(source_full):
-#         logger.error("Path %s does not exist.", source_full)
-#         return {"error": f"Path {source_full} does not exist."}
-#     dest = request_json.get("dest", "")
-#     if not dest:
-#         logger.error("Dest path cannot be empty.")
-#         return {"error": "Dest path cannot be empty."}
-#     dest_full = os.path.join(tree_root, dest)
-#     if os.path.exists(dest_full):
-#         logger.error("Dest path %s already exists", dest_full)
-#         return {"error": f"Dest path {dest_full} already exists"}
-#     if os.path.isdir(source_full):
-#         shutil.copytree(source_full, dest_full)
-#     else:
-#         shutil.copy2(source_full, dest_full)
-#     return {}
 
 
 # def upload(
