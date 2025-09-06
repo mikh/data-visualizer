@@ -22,8 +22,24 @@ def load_data_file(
             return data, ""
         case "csv":
             with open(full_path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                data = [row for row in reader]
+                data = list(csv.reader(f))
             return data, ""
         case _:
             return None, f"Unsupported data file type: {data_file_type}."
+
+
+def new_data_file_path(data_file_type: str, data_file_dir: str) -> str:
+    """Creates a new data file path."""
+    files = os.listdir(data_file_dir)
+    files = [
+        x.replace(f".{data_file_type}", "") for x in files if x.endswith(data_file_type)
+    ]
+    last_filename = 0
+    for file in files:
+        try:
+            cur_filename = int(file)
+            if cur_filename >= last_filename:
+                last_filename = cur_filename + 1
+        except ValueError:
+            continue
+    return f"{last_filename}.{data_file_type}"

@@ -203,45 +203,56 @@ def load(
         return {**file_metadata.to_dict(), "data": data}
 
 
-# def load(request_json: Dict[str, Any], tree_root: str) -> Dict[str, Union[str, Any]]:
-#     """Loads a data file."""
-#     source = request_json.get("source", "")
-#     source_full = os.path.join(tree_root, source)
-#     if not os.path.exists(source_full):
-#         logger.error("Path %s does not exist.", source_full)
-#         return {"error": f"Path {source_full} does not exist."}
+def upload(
+    engine: Engine,
+    request_files: Dict[str, Any],
+    request_form: Dict[str, Any],
+    data_file_dir: str = DATA_FILE_DIR,
+) -> Dict[str, str]:
+    """Upload a file to the visualizer."""
+    if not "file" in request_files:
+        logger.error("File not found in request.")
+        return {"error": "File not found in request."}
+    file = request_files["file"]
+    if not file.filename:
+        logger.error("File has no filename.")
+        return {"error": "File has no filename."}
 
-#     logger.debug("control=%s, source=%s, source_full=%s", "load", source, source_full)
-#     with open(source_full, "r", encoding="utf-8") as f:
-#         data = json.load(f)
-#     data["source_file"] = source
-#     logger.debug("%s", json.dumps(data))
-#     return {"data": data}
+    extension = os.path.splitext(file.filename)[1].replace(".", "").lower()
+    if extension not in SUPPORTED_FILE_TYPES:
+        logger.error("File type %s is not supported.", extension)
+        return {"error": f"File type {extension} is not supported."}
+
+    if not "path" in request_form:
+        logger.error("Path not found in request.")
+        return {"error": "Path not found in request."}
+    path = request_form["path"]
+
+    with Session(engine) as session:
+        file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", path
+        )
+        if file_metadata is not None:
+            logger.error("Path %s already exists.", path)
+            return {"error": f"Path {path} already exists."}
+
+        data_filename = data_interface.new_data_file_path(extension, data_file_dir)
+        full_path = os.path.join(data_file_dir, data_filename)
+
+        logger.info("Upload file at %s. Saving data file to %s.", path, full_path)
+        file.save(full_path)
+
+        db_interface.create_or_get_file_metadata(
+            session,
+            {
+                "name": os.path.basename(path),
+                "path": path,
+                "data_file_type": extension,
+                "data_file_path": data_filename,
+                "tags": [],
+            },
+        )
+    return {}
 
 
-# def upload(
-#     request_files: Dict[str, Any], request_form: Dict[str, Any], tree_root: str
-# ) -> Dict[str, str]:
-#     """Uploads a file to the server."""
-#     if not "file" in request_files:
-#         logger.error("File not found in request.")
-#         return {"error": "File not found in request."}
-#     if not "path" in request_form:
-#         logger.error("Path not found in request.")
-#         return {"error": "Path not found in request."}
-#     file = request_files["file"]
-#     if not file.filename:
-#         logger.error("File has no filename.")
-#         return {"error": "File has no filename."}
-#     extension = os.path.splitext(file.filename)[1].replace(".", "").lower()
-#     if extension not in SUPPORTED_FILE_TYPES:
-#         logger.error("File type %s not supported.", extension)
-#         return {"error": f"File type {extension} not supported."}
-#     path = request_form["path"]
-
-#     filename = secure_filename(file.filename)
-#     full_path = os.path.join(tree_root, path)
-#     file.save(full_path)
-#     logger.info("Saved file %s to %s", filename, full_path)
-
-#     return {}
+# TODO: Update/save call

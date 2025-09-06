@@ -7,6 +7,7 @@ import json
 import shutil
 
 import pytest
+from werkzeug.datastructures import FileStorage
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
@@ -110,19 +111,19 @@ def test_list_tree():
             {},
             {"error": "Path cannot be empty."},
             _BASE_STRUCTURE,
-            ["test-file-1.csv", "data-folder-1/test-file-2.json"],
+            ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"],
         ),
         (
             {"path": "fake-path"},
             {"error": "File metadata not found for path fake-path."},
             _BASE_STRUCTURE,
-            ["test-file-1.csv", "data-folder-1/test-file-2.json"],
+            ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"],
         ),
         (
             {"path": "test-folder-1/test-file-3"},
             {"error": "Data file not found for path fake-file.json."},
             _BASE_STRUCTURE,
-            ["test-file-1.csv", "data-folder-1/test-file-2.json"],
+            ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"],
         ),
         (
             {"path": "test-folder-1/test-file-1"},
@@ -159,7 +160,7 @@ def test_list_tree():
                 },
                 "tags": ["tag-1", "tag-2"],
             },
-            ["data-folder-1/test-file-2.json"],
+            ["0.csv", "3.json", "data-folder-1/test-file-2.json"],
         ),
     ],
     ids=[
@@ -422,6 +423,69 @@ def test_load(request_json: Dict[str, Any], want_response: Dict[str, Any]):
     )
     response = dir_tree_lib.load(engine, request_json, data_file_dir=TEST_DATA_FILE_DIR)
     assert response == want_response
+
+
+@pytest.mark.parametrize(
+    "request_files, request_form, want",
+    [
+        ({}, {}, {"error": "File not found in request."}),
+        ({"file": FileStorage()}, {}, {"error": "File has no filename."}),
+        (
+            {"file": FileStorage(filename="test.pdf")},
+            {},
+            {"error": "File type pdf is not supported."},
+        ),
+        (
+            {"file": FileStorage(filename="test.csv")},
+            {},
+            {"error": "Path not found in request."},
+        ),
+        (
+            {"file": FileStorage(filename="test.csv")},
+            {"path": "test-folder-1/test-file-1"},
+            {"error": "Path test-folder-1/test-file-1 already exists."},
+        ),
+    ],
+    ids=[
+        "no-file-in-request-gives-error",
+        "no-filename-in-file-gives-error",
+        "unsupported-extension-gives-error",
+        "no-path-gives-error",
+        "existing-path-gives-error",
+    ],
+)
+def test_upload_errors(
+    request_files: Dict[str, Any], request_form: Dict[str, Any], want: Dict[str, str]
+):
+    """Test upload errors."""
+    engine = make_test_db()
+    create_test_data_files(os.path.join(TESTDATA_DIR, "baseline"), TEST_DATA_FILE_DIR)
+    response = dir_tree_lib.upload(
+        engine, request_files, request_form, data_file_dir=TEST_DATA_FILE_DIR
+    )
+    assert response == want
+
+
+def test_upload_success():
+    """Tests upload success."""
+    engine = make_test_db()
+    create_test_data_files(os.path.join(TESTDATA_DIR, "baseline"), TEST_DATA_FILE_DIR)
+
+    assert dir_tree_lib.list_tree(engine) == _BASE_STRUCTURE
+    assert get_all_files(TEST_DATA_FILE_DIR) == [
+        "0.csv",
+        "test-file-1.csv",
+        "3.json",
+        "data-folder-1/test-file-2.json",
+    ]
+
+    assert dir_tree_lib.upload(
+        engine,
+        {"file": FileStorage(filename="test.csv")},
+        {"path": "test-folder-1/test-3"},
+        data_file_dir=TEST_DATA_FILE_DIR,
+    )
+    # TODO: finish upload success test
 
 
 if __name__ == "__main__":

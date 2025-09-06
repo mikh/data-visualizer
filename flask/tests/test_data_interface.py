@@ -66,3 +66,14 @@ def test_load_data_file(
     )
     assert data == want_data
     assert error == want_error
+
+
+@pytest.mark.parametrize(
+    "data_file_type, want",
+    [("csv", "1.csv"), ("json", "4.json")],
+    ids=["new-csv-filename", "new-json-filename"],
+)
+def test_new_data_file_path(data_file_type: str, want: str):
+    """Test new_data_file_path function."""
+    create_test_data_files(os.path.join(TESTDATA_DIR, "baseline"), TEST_DATA_FILE_DIR)
+    assert data_interface.new_data_file_path(data_file_type, TEST_DATA_FILE_DIR)
