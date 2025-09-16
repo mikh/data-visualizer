@@ -3,12 +3,9 @@
 from typing import List, Any, Dict, Union
 
 import os
-import json
-import shutil
 
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
-from werkzeug.utils import secure_filename
 
 import logging_helper
 from db import db_interface
@@ -20,11 +17,6 @@ DB_PATH = os.environ.get("DB_PATH", os.path.join("untracked", "metadata.sqlite")
 DATA_FILE_DIR = os.environ.get("DATA_FILE_DIR", os.path.join("untracked", "data"))
 
 SUPPORTED_FILE_TYPES = ["csv", "json"]
-
-# TODO: Move to using a database for metadata storage.
-# TODO: On upload check for supported file types.
-# TODO: On upload perform data-formats specific uploads
-# TODO: Change delete/move/copy/etc to use the database instead of the file system
 
 logger = logging_helper.init_logging(
     __name__, VERBOSE, LOG_DIRECTORY, "dir_tree_lib.log"
@@ -71,7 +63,7 @@ def list_tree(
     return {"tree": structure, "tags": tags}
 
 
-def delete(
+def tree_delete(
     engine: Engine,
     request_json: Dict[str, Any],
     data_file_dir: str = DATA_FILE_DIR,
@@ -252,7 +244,38 @@ def upload(
                 "tags": [],
             },
         )
+        session.commit()
     return {}
 
 
-# TODO: Update/save call
+def update(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+    """Updates a file."""
+    path = request_json.get("path", "")
+    if not path:
+        logger.error("Path cannot be empty.")
+        return {"error": "Path cannot be empty."}
+    logger.debug("control=%s, path=%s", "update", path)
+    with Session(engine) as session:
+        file_metadata = db_interface.get_db_object_by_key(
+            session, "file_metadata", "path", path
+        )
+        if file_metadata is None:
+            logger.error("File metadata not found for path %s.", path)
+            return {"error": f"File metadata not found for path {path}."}
+
+        tags = request_json.get("tags", None)
+        update_data = {
+            "name": request_json.get("name", None),
+            "data_file_type": request_json.get("data_file_type", None),
+            "data_file_path": request_json.get("data_file_path", None),
+        }
+        for key, value in update_data.items():
+            if value is not None:
+                setattr(file_metadata, key, value)
+        if tags is not None:
+            file_metadata.tags = []
+            for tag in tags:
+                db_tag = db_interface.create_or_get_tag(session, tag)
+                file_metadata.tags.append(db_tag)
+        session.commit()
+    return {}

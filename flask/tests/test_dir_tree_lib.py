@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 import os
 import json
 import shutil
+import copy
 
 import pytest
 from werkzeug.datastructures import FileStorage
@@ -111,19 +112,25 @@ def test_list_tree():
             {},
             {"error": "Path cannot be empty."},
             _BASE_STRUCTURE,
-            ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"],
+            sorted(
+                ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"]
+            ),
         ),
         (
             {"path": "fake-path"},
             {"error": "File metadata not found for path fake-path."},
             _BASE_STRUCTURE,
-            ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"],
+            sorted(
+                ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"]
+            ),
         ),
         (
             {"path": "test-folder-1/test-file-3"},
             {"error": "Data file not found for path fake-file.json."},
             _BASE_STRUCTURE,
-            ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"],
+            sorted(
+                ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"]
+            ),
         ),
         (
             {"path": "test-folder-1/test-file-1"},
@@ -160,7 +167,7 @@ def test_list_tree():
                 },
                 "tags": ["tag-1", "tag-2"],
             },
-            ["0.csv", "3.json", "data-folder-1/test-file-2.json"],
+            sorted(["0.csv", "3.json", "data-folder-1/test-file-2.json"]),
         ),
     ],
     ids=[
@@ -182,12 +189,12 @@ def test_delete(
         os.path.join(TESTDATA_DIR, "baseline"),
         TEST_DATA_FILE_DIR,
     )
-    response = dir_tree_lib.delete(
+    response = dir_tree_lib.tree_delete(
         engine, request_json, data_file_dir=TEST_DATA_FILE_DIR
     )
     assert response == want_response
     assert dir_tree_lib.list_tree(engine) == want_structure
-    assert get_all_files(TEST_DATA_FILE_DIR) == want_data_files
+    assert sorted(get_all_files(TEST_DATA_FILE_DIR)) == want_data_files
 
 
 @pytest.mark.parametrize(
@@ -472,20 +479,99 @@ def test_upload_success():
     create_test_data_files(os.path.join(TESTDATA_DIR, "baseline"), TEST_DATA_FILE_DIR)
 
     assert dir_tree_lib.list_tree(engine) == _BASE_STRUCTURE
-    assert get_all_files(TEST_DATA_FILE_DIR) == [
-        "0.csv",
-        "test-file-1.csv",
-        "3.json",
-        "data-folder-1/test-file-2.json",
-    ]
+    assert sorted(get_all_files(TEST_DATA_FILE_DIR)) == sorted(
+        [
+            "0.csv",
+            "test-file-1.csv",
+            "3.json",
+            "data-folder-1/test-file-2.json",
+        ]
+    )
 
-    assert dir_tree_lib.upload(
+    assert not dir_tree_lib.upload(
         engine,
         {"file": FileStorage(filename="test.csv")},
-        {"path": "test-folder-1/test-3"},
+        {"path": "test-folder-1/test-5"},
         data_file_dir=TEST_DATA_FILE_DIR,
     )
-    # TODO: finish upload success test
+
+    new_structure = copy.deepcopy(_BASE_STRUCTURE)
+    new_structure["tree"]["test-folder-1"]["children"]["test-5"] = {
+        "type": "file",
+        "full-path": "test-folder-1/test-5",
+        "tags": [],
+    }
+    assert dir_tree_lib.list_tree(engine) == new_structure
+    assert sorted(get_all_files(TEST_DATA_FILE_DIR)) == sorted(
+        [
+            "0.csv",
+            "1.csv",
+            "test-file-1.csv",
+            "3.json",
+            "data-folder-1/test-file-2.json",
+        ]
+    )
+
+
+_BASELINE_TEST_FILE_1 = {
+    "id": 1,
+    "name": "test-file-1",
+    "path": "test-folder-1/test-file-1",
+    "data_file_type": "csv",
+    "data_file_path": "test-file-1.csv",
+    "tags": ["tag-1", "tag-2"],
+}
+
+
+@pytest.mark.parametrize(
+    "request_json, want_response, want_object_data",
+    [
+        ({}, {"error": "Path cannot be empty."}, _BASELINE_TEST_FILE_1),
+        (
+            {"path": "fake-path"},
+            {"error": "File metadata not found for path fake-path."},
+            _BASELINE_TEST_FILE_1,
+        ),
+        (
+            {
+                "path": "test-folder-1/test-file-1",
+                "name": "test-file-1-new",
+                "data_file_type": "json",
+                "data_file_path": "test-file-1.json",
+                "tags": ["tag-3"],
+            },
+            {},
+            {
+                **_BASELINE_TEST_FILE_1,
+                "name": "test-file-1-new",
+                "data_file_type": "json",
+                "data_file_path": "test-file-1.json",
+                "tags": ["tag-3"],
+            },
+        ),
+    ],
+    ids=[
+        "empty-path-gives-error",
+        "bad-path-gives-error",
+        "update-file",
+    ],
+)
+def test_update(
+    request_json: Dict[str, Any],
+    want_response: Dict[str, str],
+    want_object_data: Dict[str, Any],
+):
+    """Tests the update function."""
+    engine = make_test_db()
+    response = dir_tree_lib.update(engine, request_json)
+    assert response == want_response
+    with Session(engine) as session:
+        assert (
+            db_interface.get_db_object_by_key(
+                session, "file_metadata", "path", "test-folder-1/test-file-1"
+            ).to_dict()
+            == want_object_data
+        )
 
 
 if __name__ == "__main__":
