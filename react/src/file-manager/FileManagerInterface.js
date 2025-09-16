@@ -50,25 +50,6 @@ function performRequest(body, setStructure, setTags) {
 }
 
 /**
- * Creates a folder.
- *
- * @param {String} path : Path to create the folder at.
- * @param {Function} setStructure : The function to set the structure.
- * @param {Function} setTags : The function to set the tags.
- */
-export function createFolder(path, setStructure, setTags) {
-  performRequest(
-    {
-      control: "create",
-      type: "dir",
-      name: path,
-    },
-    setStructure,
-    setTags
-  );
-}
-
-/**
  * Deletes an object.
  *
  * @param {String} path : Path to delete the object at.
@@ -79,7 +60,7 @@ export function deleteObject(path, setStructure, setTags) {
   performRequest(
     {
       control: "delete",
-      name: path,
+      path: path,
     },
     setStructure,
     setTags
@@ -137,7 +118,7 @@ export function loadObject(path, loadFile) {
     method: "POST",
     body: JSON.stringify({
       control: "load",
-      source: path,
+      path: path,
     }),
     headers: {
       "Content-Type": "application/json; charset=utf-8",
@@ -178,4 +159,24 @@ export function uploadFile(file, path, setStructure, setTags) {
       loadTree(setStructure, setTags);
     })
     .catch((error) => console.error("Error:", error));
+}
+
+/**
+ * Updates an object.
+ *
+ * @param {String} path : Path to update the object at.
+ * @param {Object} updateData : The data to update the object with.
+ * @param {Function} setStructure : The function to set the structure.
+ * @param {Function} setTags : The function to set the tags.
+ */
+export function updateObject(path, updateData, setStructure, setTags) {
+  performRequest(
+    {
+      control: "update",
+      path: path,
+      ...updateData,
+    },
+    setStructure,
+    setTags
+  );
 }

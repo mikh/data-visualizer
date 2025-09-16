@@ -2,15 +2,12 @@ import Tree from "file-tree";
 import { useEffect, useState } from "react";
 import {
   copyObject,
-  createFolder,
   deleteObject,
   loadObject,
   loadTree,
   moveObject,
   uploadFile,
 } from "./FileManagerInterface";
-
-const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
 
 export default function FileManager() {
   const [structure, setStructure] = useState(null);
@@ -31,7 +28,7 @@ export default function FileManager() {
           structure={structure}
           filterable_tags={tags}
           createNewFile={null}
-          createNewFolder={(path) => createFolder(path, setStructure, setTags)}
+          createNewFolder={null}
           deletePath={(path) => deleteObject(path, setStructure, setTags)}
           move={(src, dst) => moveObject(src, dst, setStructure, setTags)}
           copy={(src, dst) => copyObject(src, dst, setStructure, setTags)}
