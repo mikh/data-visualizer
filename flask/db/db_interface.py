@@ -2,6 +2,7 @@
 
 from typing import List, Dict, Any, Union
 
+from flask.cli import F
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 
@@ -84,6 +85,17 @@ def mass_add_objects(session: Session, objects: Dict[str, List[Dict[str, Any]]])
                 case "file_metadata":
                     create_or_get_file_metadata(session, table_object)
         session.commit()
+
+
+def export_db_objects(session: Session) -> Dict[str, List[Dict[str, Any]]]:
+    """Export database objects to a dictionary."""
+    file_metadata = session.query(FileMetadata).all()
+    file_metadata = [file_metadata.to_dict() for file_metadata in file_metadata]
+    for single_file in file_metadata:
+        del single_file["id"]
+    return {
+        "file_metadata": file_metadata,
+    }
 
 
 def get_object_counts(engine: Engine) -> Dict[str, int]:
