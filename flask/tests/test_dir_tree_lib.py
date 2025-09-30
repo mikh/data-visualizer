@@ -15,9 +15,15 @@ from sqlalchemy.orm import Session
 from db import db_interface
 import dir_tree_lib
 
-TESTDATA_DIR = os.path.join("flask", "tests", "testdata")
-TEST_DB_JSON_PATH = os.path.join(TESTDATA_DIR, "baseline-db.json")
-TEST_DATA_FILE_DIR = os.path.join("flask", "untracked", "tests", "data")
+TESTDATA_DIR = os.environ.get(
+    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
+)
+TEST_DB_JSON_PATH = os.environ.get(
+    "TEST_DB_JSON_PATH", os.path.join(TESTDATA_DIR, "baseline-db.json")
+)
+TEST_DATA_FILE_DIR = os.environ.get(
+    "TEST_DATA_FILE_DIR", os.path.join("flask", "untracked", "tests", "data")
+)
 
 _BASE_STRUCTURE = {
     "tree": {
