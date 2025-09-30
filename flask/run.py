@@ -1,11 +1,14 @@
 """Module run launches the Flask backend."""
 
+import os
+
 import dir_tree_lib
 from db import db_interface
 
 from flask_cors import CORS
 from flask import Flask, request
 
+VERSION_FILE = os.environ.get("VERSION_FILE", os.path.join("flask", "version"))
 
 app = Flask(__name__)
 CORS(app)
@@ -14,7 +17,7 @@ CORS(app)
 @app.route("/api/version")
 def version():
     """Gets the version of the Flask backend."""
-    with open("version", "r", encoding="utf-8") as f:
+    with open(VERSION_FILE, "r", encoding="utf-8") as f:
         return {"version": f.read()}
 
 
@@ -63,5 +66,5 @@ def upload_file():
     )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True)

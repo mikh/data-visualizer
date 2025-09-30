@@ -35,6 +35,7 @@ cd flask
 export FILE_BASE_DIR="untracked/data"
 export LOG_DIR="untracked/logs"
 export DB_PATH="untracked/metadata.sqlite"
+export VERSION_FILE="version"
 
 mkdir -p $FILE_BASE_DIR
 mkdir -p $LOG_DIR

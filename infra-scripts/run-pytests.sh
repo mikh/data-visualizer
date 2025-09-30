@@ -49,6 +49,7 @@ export DB_PATH="untracked/metadata.sqlite"
 export TESTDATA_DIR="tests/testdata"
 export TEST_DATA_FILE_DIR="untracked/tests/data"
 export TEST_DB_JSON_PATH="tests/testdata/baseline-db.json"
+export VERSION_FILE="version"
 
 coverage run \
     --source="." \
