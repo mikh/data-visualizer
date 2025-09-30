@@ -28,10 +28,11 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+test_flag=""
 if [ "$test" = true ]; then
-    session_name=$(tmux new -dP "./infra-scripts/run-flask.sh --test")
-else
-    session_name=$(tmux new -dP "./infra-scripts/run-flask.sh")
+    test_flag="--test"
 fi
-tmux split-window -t "$session_name" -dh "./infra-scripts/run-react.sh"
+
+session_name=$(tmux new -dP "./flask/run-local.sh $test_flag; sleep 99d")
+tmux split-window -t "$session_name" -dh "./react/run-local.sh; sleep 99d"
 tmux attach -t "$session_name"

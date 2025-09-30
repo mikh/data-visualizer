@@ -44,7 +44,7 @@ if [ "$test" = true ]; then
     data_seed_dir="tests/testdata/cypress-data"
 else
     db_seed_file="tests/testdata/baseline-db.json"
-    data_seed_dir="tests/testdata/baseline-data"
+    data_seed_dir="tests/testdata/baseline"
 fi
 
 python -m db.db_control  \
@@ -57,4 +57,4 @@ python -m db.db_control  \
 
 python run.py
 
-sleep 99d
+echo "Flask runner exited."
