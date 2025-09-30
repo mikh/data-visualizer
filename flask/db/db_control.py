@@ -104,14 +104,9 @@ def create(
             db_seed_data = json.load(file)
         with Session(engine) as session:
             db_interface.mass_add_objects(session, db_seed_data)
-    if data_seed_dir:  # TODO: Move this to data_interface library
-        for root, _, files in os.walk(data_seed_dir):
-            for file in files:
-                src = os.path.join(root, file)
-                dst = os.path.join(data_file_dir, src[len(data_seed_dir) + 1 :])
-                dst_dir = os.path.dirname(dst)
-                os.makedirs(dst_dir, exist_ok=True)
-                shutil.copy(src, dst)
+    if data_seed_dir:
+        shutil.rmtree(data_file_dir)
+        shutil.copytree(data_seed_dir, data_file_dir)
 
 
 def delete_db(db_path: str, data_file_dir: str, delete_data_files: bool):
@@ -136,11 +131,12 @@ def export(
     engine = db_interface.make_engine(db_path)
     with Session(engine) as session:
         db_objects = db_interface.export_db_objects(session)
+    os.makedirs(os.path.dirname(output_db_file), exist_ok=True)
+    os.makedirs(os.path.dirname(output_data_file_dir), exist_ok=True)
     with open(output_db_file, "w", encoding="utf-8") as file:
         json.dump(db_objects, file)
 
-    # TODO: Add data file export
-    # shutil.copytree(data_file_dir, output_data_file_dir)
+    shutil.copytree(data_file_dir, output_data_file_dir)
 
 
 def main(args: List[str]):
