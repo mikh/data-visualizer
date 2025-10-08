@@ -5,8 +5,10 @@ from typing import Dict, Any
 import os
 import json
 import shutil
+import io
 
 import pytest
+from werkzeug.datastructures import FileStorage
 
 import run
 import dir_tree_lib
@@ -188,6 +190,48 @@ def test_tree_control(request_json: Dict[str, Any], want_response: Dict[str, Any
 
     finally:
         # Restore original DB_PATH
+        dir_tree_lib.DB_PATH = original_db_path
+        dir_tree_lib.DATA_FILE_DIR = original_data_file_dir
+
+        # Clean up test files
+        if os.path.exists(test_db_path):
+            os.remove(test_db_path)
+        if os.path.exists(TEST_DATA_FILE_DIR):
+            shutil.rmtree(TEST_DATA_FILE_DIR)
+
+
+def test_upload_file():
+    """Test the upload file function - successful upload case."""
+    # Set up test environment
+    test_db_path = setup_test_environment()
+
+    # Override the DB_PATH and DATA_FILE_DIR for testing
+    original_db_path = dir_tree_lib.DB_PATH
+    dir_tree_lib.DB_PATH = test_db_path
+    original_data_file_dir = dir_tree_lib.DATA_FILE_DIR
+    dir_tree_lib.DATA_FILE_DIR = TEST_DATA_FILE_DIR
+
+    try:
+        # Prepare the multipart form data for successful upload
+        data = {
+            "path": "test-folder-1/test-upload",
+            "file": (
+                FileStorage(
+                    filename="test.csv", stream=io.BytesIO(b"col1,col2\nval1,val2")
+                ),
+                "test.csv",
+            ),
+        }
+
+        # Make the POST request
+        response = run.app.test_client().post("/api/upload", data=data)
+
+        # Assert response
+        assert response.status_code == 200
+        assert response.json == {}
+
+    finally:
+        # Restore original paths
         dir_tree_lib.DB_PATH = original_db_path
         dir_tree_lib.DATA_FILE_DIR = original_data_file_dir
 
