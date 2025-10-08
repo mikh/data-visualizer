@@ -38,11 +38,10 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-mkdir -p $output_dir
 
 . .venv/bin/activate
 cd flask
-
+mkdir -p $output_dir
 export FILE_BASE_DIR="untracked/data"
 export LOG_DIR="untracked/logs"
 export DB_PATH="untracked/metadata.sqlite"
