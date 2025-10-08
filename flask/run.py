@@ -35,6 +35,7 @@ def tree_control():  # pylint: disable=too-many-return-statements
             return dir_tree_lib.tree_delete(
                 db_interface.make_engine(dir_tree_lib.DB_PATH),
                 request.json,
+                data_file_dir=dir_tree_lib.DATA_FILE_DIR,
             )
         case "move":
             return dir_tree_lib.move(
@@ -42,7 +43,9 @@ def tree_control():  # pylint: disable=too-many-return-statements
             )
         case "load":
             return dir_tree_lib.load(
-                db_interface.make_engine(dir_tree_lib.DB_PATH), request.json
+                db_interface.make_engine(dir_tree_lib.DB_PATH),
+                request.json,
+                data_file_dir=dir_tree_lib.DATA_FILE_DIR,
             )
         case "copy":
             return dir_tree_lib.copy(
@@ -63,6 +66,7 @@ def upload_file():
         db_interface.make_engine(dir_tree_lib.DB_PATH),
         request.files,
         request.form,
+        data_file_dir=dir_tree_lib.DATA_FILE_DIR,
     )
 
 

@@ -86,7 +86,10 @@ def tree_delete(
         data_file_path = file_metadata.data_file_path
         data_file_full_path = os.path.join(data_file_dir, data_file_path)
         if not os.path.exists(data_file_full_path):
-            logger.error("Data file not found for path %s.", data_file_path)
+            logger.error(
+                "Data file not found for path %s.",
+                data_file_path,
+            )
             return {"error": f"Data file not found for path {data_file_path}."}
         os.remove(data_file_full_path)
         logger.info("Deleted data file %s.", data_file_full_path)
