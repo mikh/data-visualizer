@@ -1,11 +1,14 @@
 """Module run launches the Flask backend."""
 
+import os
+
 import dir_tree_lib
 from db import db_interface
 
 from flask_cors import CORS
 from flask import Flask, request
 
+VERSION_FILE = os.environ.get("VERSION_FILE", os.path.join("flask", "version"))
 
 app = Flask(__name__)
 CORS(app)
@@ -14,7 +17,7 @@ CORS(app)
 @app.route("/api/version")
 def version():
     """Gets the version of the Flask backend."""
-    with open("version", "r", encoding="utf-8") as f:
+    with open(VERSION_FILE, "r", encoding="utf-8") as f:
         return {"version": f.read()}
 
 
@@ -32,6 +35,7 @@ def tree_control():  # pylint: disable=too-many-return-statements
             return dir_tree_lib.tree_delete(
                 db_interface.make_engine(dir_tree_lib.DB_PATH),
                 request.json,
+                data_file_dir=dir_tree_lib.DATA_FILE_DIR,
             )
         case "move":
             return dir_tree_lib.move(
@@ -39,7 +43,9 @@ def tree_control():  # pylint: disable=too-many-return-statements
             )
         case "load":
             return dir_tree_lib.load(
-                db_interface.make_engine(dir_tree_lib.DB_PATH), request.json
+                db_interface.make_engine(dir_tree_lib.DB_PATH),
+                request.json,
+                data_file_dir=dir_tree_lib.DATA_FILE_DIR,
             )
         case "copy":
             return dir_tree_lib.copy(
@@ -60,8 +66,9 @@ def upload_file():
         db_interface.make_engine(dir_tree_lib.DB_PATH),
         request.files,
         request.form,
+        data_file_dir=dir_tree_lib.DATA_FILE_DIR,
     )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     app.run(debug=True)

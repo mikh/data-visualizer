@@ -10,8 +10,12 @@ import pytest
 from db import data_interface
 
 
-TESTDATA_DIR = os.path.join("flask", "tests", "testdata")
-TEST_DATA_FILE_DIR = os.path.join("flask", "untracked", "tests", "data")
+TESTDATA_DIR = os.environ.get(
+    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
+)
+TEST_DATA_FILE_DIR = os.environ.get(
+    "TEST_DATA_FILE_DIR", os.path.join("flask", "untracked", "tests", "data")
+)
 
 
 def create_test_data_files(testdata_files_dir: str, data_file_dir: str):

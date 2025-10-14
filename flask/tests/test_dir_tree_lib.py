@@ -15,9 +15,15 @@ from sqlalchemy.orm import Session
 from db import db_interface
 import dir_tree_lib
 
-TESTDATA_DIR = os.path.join("flask", "tests", "testdata")
-TEST_DB_JSON_PATH = os.path.join(TESTDATA_DIR, "baseline-db.json")
-TEST_DATA_FILE_DIR = os.path.join("flask", "untracked", "tests", "data")
+TESTDATA_DIR = os.environ.get(
+    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
+)
+TEST_DB_JSON_PATH = os.environ.get(
+    "TEST_DB_JSON_PATH", os.path.join(TESTDATA_DIR, "baseline-db.json")
+)
+TEST_DATA_FILE_DIR = os.environ.get(
+    "TEST_DATA_FILE_DIR", os.path.join("flask", "untracked", "tests", "data")
+)
 
 _BASE_STRUCTURE = {
     "tree": {
@@ -45,6 +51,23 @@ _BASE_STRUCTURE = {
                     "type": "file",
                     "full-path": "test-folder-2/test-file-4",
                     "tags": [],
+                },
+            },
+        },
+        "test-folder-3": {
+            "type": "folder",
+            "full-path": "test-folder-3",
+            "children": {
+                "test-sub-folder-1": {
+                    "type": "folder",
+                    "full-path": "test-folder-3/test-sub-folder-1",
+                    "children": {
+                        "test-file-5": {
+                            "type": "file",
+                            "full-path": "test-folder-3/test-sub-folder-1/test-file-5",
+                            "tags": [],
+                        },
+                    },
                 },
             },
         },
@@ -113,7 +136,13 @@ def test_list_tree():
             {"error": "Path cannot be empty."},
             _BASE_STRUCTURE,
             sorted(
-                ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"]
+                [
+                    "0.csv",
+                    "test-file-1.csv",
+                    "test-file-5.csv",
+                    "3.json",
+                    "data-folder-1/test-file-2.json",
+                ]
             ),
         ),
         (
@@ -121,7 +150,13 @@ def test_list_tree():
             {"error": "File metadata not found for path fake-path."},
             _BASE_STRUCTURE,
             sorted(
-                ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"]
+                [
+                    "0.csv",
+                    "test-file-1.csv",
+                    "test-file-5.csv",
+                    "3.json",
+                    "data-folder-1/test-file-2.json",
+                ]
             ),
         ),
         (
@@ -129,7 +164,13 @@ def test_list_tree():
             {"error": "Data file not found for path fake-file.json."},
             _BASE_STRUCTURE,
             sorted(
-                ["0.csv", "test-file-1.csv", "3.json", "data-folder-1/test-file-2.json"]
+                [
+                    "0.csv",
+                    "test-file-1.csv",
+                    "test-file-5.csv",
+                    "3.json",
+                    "data-folder-1/test-file-2.json",
+                ]
             ),
         ),
         (
@@ -159,6 +200,23 @@ def test_list_tree():
                             },
                         },
                     },
+                    "test-folder-3": {
+                        "type": "folder",
+                        "full-path": "test-folder-3",
+                        "children": {
+                            "test-sub-folder-1": {
+                                "type": "folder",
+                                "full-path": "test-folder-3/test-sub-folder-1",
+                                "children": {
+                                    "test-file-5": {
+                                        "type": "file",
+                                        "full-path": "test-folder-3/test-sub-folder-1/test-file-5",
+                                        "tags": [],
+                                    },
+                                },
+                            },
+                        },
+                    },
                     "test-file-2": {
                         "type": "file",
                         "full-path": "test-file-2",
@@ -167,7 +225,9 @@ def test_list_tree():
                 },
                 "tags": ["tag-1", "tag-2"],
             },
-            sorted(["0.csv", "3.json", "data-folder-1/test-file-2.json"]),
+            sorted(
+                ["0.csv", "test-file-5.csv", "3.json", "data-folder-1/test-file-2.json"]
+            ),
         ),
     ],
     ids=[
@@ -253,6 +313,23 @@ def test_delete(
                                 "type": "file",
                                 "full-path": "test-folder-2/test-file-4",
                                 "tags": [],
+                            },
+                        },
+                    },
+                    "test-folder-3": {
+                        "type": "folder",
+                        "full-path": "test-folder-3",
+                        "children": {
+                            "test-sub-folder-1": {
+                                "type": "folder",
+                                "full-path": "test-folder-3/test-sub-folder-1",
+                                "children": {
+                                    "test-file-5": {
+                                        "type": "file",
+                                        "full-path": "test-folder-3/test-sub-folder-1/test-file-5",
+                                        "tags": [],
+                                    },
+                                },
                             },
                         },
                     },
@@ -347,6 +424,23 @@ def test_move(
                                 "type": "file",
                                 "full-path": "test-folder-2/test-file-4",
                                 "tags": [],
+                            },
+                        },
+                    },
+                    "test-folder-3": {
+                        "type": "folder",
+                        "full-path": "test-folder-3",
+                        "children": {
+                            "test-sub-folder-1": {
+                                "type": "folder",
+                                "full-path": "test-folder-3/test-sub-folder-1",
+                                "children": {
+                                    "test-file-5": {
+                                        "type": "file",
+                                        "full-path": "test-folder-3/test-sub-folder-1/test-file-5",
+                                        "tags": [],
+                                    },
+                                },
                             },
                         },
                     },
@@ -483,6 +577,7 @@ def test_upload_success():
         [
             "0.csv",
             "test-file-1.csv",
+            "test-file-5.csv",
             "3.json",
             "data-folder-1/test-file-2.json",
         ]
@@ -491,14 +586,14 @@ def test_upload_success():
     assert not dir_tree_lib.upload(
         engine,
         {"file": FileStorage(filename="test.csv")},
-        {"path": "test-folder-1/test-5"},
+        {"path": "test-folder-1/test-6"},
         data_file_dir=TEST_DATA_FILE_DIR,
     )
 
     new_structure = copy.deepcopy(_BASE_STRUCTURE)
-    new_structure["tree"]["test-folder-1"]["children"]["test-5"] = {
+    new_structure["tree"]["test-folder-1"]["children"]["test-6"] = {
         "type": "file",
-        "full-path": "test-folder-1/test-5",
+        "full-path": "test-folder-1/test-6",
         "tags": [],
     }
     assert dir_tree_lib.list_tree(engine) == new_structure
@@ -507,6 +602,7 @@ def test_upload_success():
             "0.csv",
             "1.csv",
             "test-file-1.csv",
+            "test-file-5.csv",
             "3.json",
             "data-folder-1/test-file-2.json",
         ]
@@ -574,7 +670,7 @@ def test_update(
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     create_test_data_files(
         os.path.join("tests", "testdata", "baseline"),
         os.path.join("untracked", "tests", "data"),

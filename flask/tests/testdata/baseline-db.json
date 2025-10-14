@@ -27,6 +27,13 @@
       "data_file_type": "fake-data-type",
       "data_file_path": "test-file-1.csv",
       "tags": []
+    },
+    {
+      "name": "test-file-5",
+      "path": "test-folder-3/test-sub-folder-1/test-file-5",
+      "data_file_type": "csv",
+      "data_file_path": "test-file-5.csv",
+      "tags": []
     }
   ]
 }
