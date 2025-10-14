@@ -239,4 +239,11 @@ def test_get_db_object_by_key(
         assert output_db_object == want_dict
 
 
-# TODO: Add test for export_db_objects
+def test_export_db_objects():
+    """Tests the export_db_objects function."""
+    engine = make_test_db()
+    with Session(engine) as session:
+        output_db_objects = db_interface.export_db_objects(session)
+        with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
+            want_db_objects = json.load(file)
+        assert output_db_objects == want_db_objects
