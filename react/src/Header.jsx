@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
+const REACT_VERSION = import.meta.env.REACT_VERSION || "0.0.0";
 
 export default function Header() {
   const [version, setVersion] = useState("");
@@ -31,8 +32,9 @@ export default function Header() {
     <header className="bg-slate-800 text-white px-8 py-4 flex justify-between items-center shadow">
       <h1 className="m-0 text-2xl font-bold">Data Visualization</h1>
       <div className="text-sm opacity-80">
-        {loading ? "Loading version..." : error ? error : `v${version}`}
+        {loading ? "Loading version..." : error ? error : `Flask v${version}`}
       </div>
+      <div className="text-sm opacity-80">React v{REACT_VERSION}</div>
     </header>
   );
 }
