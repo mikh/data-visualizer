@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "data-visualizer.fullname" . }}-react
+  labels:
+    {{- include "data-visualizer.react.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "data-visualizer.react.selectorLabels" . | nindent 4 }}

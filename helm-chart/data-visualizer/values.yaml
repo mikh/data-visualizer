@@ -1,0 +1,17 @@
+image:
+  repository:
+  registry:
+  pullPolicy: IfNotPresent
+  flask:
+    image: flask
+    tag:
+  react:
+    image: react
+    tag:
+
+imagePullSecrets: []
+nameOverride: ""
+fullNameOverride: ""
+
+ingress:
+  host:
