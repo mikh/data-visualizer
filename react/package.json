@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "file-tree": "file:../../react-modules/file-tree/file-tree-1.0.0.tgz",
+    "file-tree": "file:deps/file-tree-1.0.0.tgz",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
