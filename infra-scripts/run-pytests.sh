@@ -39,7 +39,6 @@ while [ $# -gt 0 ]; do
 done
 
 
-. .venv/bin/activate
 cd flask
 mkdir -p $output_dir
 export FILE_BASE_DIR="untracked/data"
