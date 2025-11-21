@@ -36,7 +36,7 @@ steps:
       HARBOR_PASSWORD:
         from_secret: HARBOR_PASSWORD
     commands:
-      - sleep 5
+      - sleep 6
       - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
       - ./infra-scripts/build-react-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/react
 
