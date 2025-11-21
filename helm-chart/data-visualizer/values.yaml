@@ -15,3 +15,7 @@ fullNameOverride: ""
 
 ingress:
   host:
+
+dataVisualizer:
+  flask:
+    pvcSize: 5Gi
