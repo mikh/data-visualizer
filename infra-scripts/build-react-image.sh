@@ -100,7 +100,6 @@ fi
 docker build \
     --build-arg URL_PREFIX=${url_prefix} \
     --build-arg REACT_VERSION=${version} \
-    $image_path \
     $git_tag_flag \
     $latest_tag_flag \
     $tag_flag \

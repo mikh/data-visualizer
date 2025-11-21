@@ -93,7 +93,6 @@ if [ -n "$tag" ]; then
 fi
 
 docker build \
-    $image_path \
     $git_tag_flag \
     $latest_tag_flag \
     $tag_flag \

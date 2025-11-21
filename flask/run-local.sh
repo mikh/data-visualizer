@@ -41,8 +41,8 @@ mkdir -p $FILE_BASE_DIR
 mkdir -p $LOG_DIR
 
 if [ "$test" = true ]; then
-    db_seed_file="tests/testdata/cypress-db.json"
-    data_seed_dir="tests/testdata/cypress-data"
+    db_seed_file="tests/testdata/baseline-db.json"
+    data_seed_dir="tests/testdata/baseline"
 else
     db_seed_file="tests/testdata/baseline-db.json"
     data_seed_dir="tests/testdata/baseline"
