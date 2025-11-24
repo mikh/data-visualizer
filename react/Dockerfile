@@ -12,6 +12,7 @@ COPY vite.config.js ./
 COPY tailwind.config.js ./
 COPY run-container.sh ./
 COPY deps ./deps
+COPY postcss.config.js ./
 
 ENV VITE_URL_PREFIX=${URL_PREFIX}
 ENV REACT_VERSION=${REACT_VERSION}
