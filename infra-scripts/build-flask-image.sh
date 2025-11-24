@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eo pipefail
+set -exo pipefail
 
 function help {
     echo "Build the Flask image"
@@ -16,7 +16,7 @@ function help {
 
 push=false
 image_path=""
-git_tag=false
+use_git_tag=false
 latest=false
 tag=""
 
@@ -32,7 +32,7 @@ while [ $# -gt 0 ]; do
             image_path="$2"
             shift;;
         --git-tag)
-            git_tag=true
+            use_git_tag=true
             ;;
         --latest)
             latest=true
@@ -53,7 +53,7 @@ latest_tag=""
 
 if [ "$push" = true ]; then
     version=$(cat flask/version)
-    if [ "$git_tag" = true ]; then
+    if [ "$use_git_tag" = true ]; then
         current_branch=$(git rev-parse --abbrev-ref HEAD)
         current_branch=$(echo $current_branch | tr '/' '-')
         git_tag="${current_branch}-${version}"
