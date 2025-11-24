@@ -1,6 +1,10 @@
 """Module run launches the Flask backend."""
 
+from typing import List
+
 import os
+import argparse
+import sys
 
 import dir_tree_lib
 from db import db_interface
@@ -70,5 +74,15 @@ def upload_file():
     )
 
 
+def parse_args(args: List[str]) -> argparse.Namespace:
+    """Parses command line arguments."""
+    parser = argparse.ArgumentParser(description="Flask backend")
+    parser.add_argument("--debug", action="store_true", help="Run in debug mode.")
+    parser.add_argument("--port", type=int, default=5000, help="Port to run on.")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to run on.")
+    return parser.parse_args(args)
+
+
 if __name__ == "__main__":  # pragma: no cover
-    app.run(debug=True)
+    cli_args = parse_args(sys.argv[1:])
+    app.run(debug=cli_args.debug, port=cli_args.port, host=cli_args.host)

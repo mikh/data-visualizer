@@ -1,0 +1,21 @@
+image:
+  repository:
+  registry:
+  pullPolicy: IfNotPresent
+  flask:
+    image: flask
+    tag:
+  react:
+    image: react
+    tag:
+
+imagePullSecrets: []
+nameOverride: ""
+fullNameOverride: ""
+
+ingress:
+  host:
+
+dataVisualizer:
+  flask:
+    pvcSize: 5Gi

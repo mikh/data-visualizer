@@ -1,0 +1,53 @@
+kind: pipeline
+type: docker
+name: build
+
+clone:
+  skip_verify: true
+
+steps:
+  - name: pytests
+    image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
+    commands:
+      - pip install -r flask/requirements.txt
+      - ./infra-scripts/run-pytests.sh
+  - name: build-flask-image
+    image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
+    volumes:
+      - name: dockersock
+        path: /var/run
+    environment:
+      HARBOR_USERNAME:
+        from_secret: HARBOR_USERNAME
+      HARBOR_PASSWORD:
+        from_secret: HARBOR_PASSWORD
+    commands:
+      - sleep 5
+      - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
+      - ./infra-scripts/build-flask-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
+  - name: build-react-image
+    image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
+    volumes:
+      - name: dockersock
+        path: /var/run
+    environment:
+      HARBOR_USERNAME:
+        from_secret: HARBOR_USERNAME
+      HARBOR_PASSWORD:
+        from_secret: HARBOR_PASSWORD
+    commands:
+      - sleep 6
+      - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
+      - ./infra-scripts/build-react-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/react
+
+services:
+  - name: docker
+    image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
+    privileged: true
+    volumes:
+      - name: dockersock
+        path: /var/run
+
+volumes:
+  - name: dockersock
+    temp: {}
