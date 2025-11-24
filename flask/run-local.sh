@@ -56,6 +56,6 @@ python -m db.db_control  \
     --db-seed-data "$db_seed_file" \
     --data-seed-dir "$data_seed_dir"
 
-python run.py
+python run.py --debug --port 5000 --host 127.0.0.1
 
 echo "Flask runner exited."

@@ -19,6 +19,6 @@ if [ ! -f $DB_PATH ]; then
         create
 fi
 
-python run.py
+python run.py --debug --port 8080 --host 0.0.0.0
 
 echo "Flask runner exited."
