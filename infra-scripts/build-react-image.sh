@@ -15,7 +15,7 @@ function help {
     echo "  --tag                  : Custom tag for the image."
 }
 
-url_prefix="http://127.0.0.1:8080"
+url_prefix="https://data-visualizer.cantrip.com"
 push=false
 image_path=""
 use_git_tag=false
