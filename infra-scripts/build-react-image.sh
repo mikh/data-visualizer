@@ -15,7 +15,7 @@ function help {
     echo "  --tag                  : Custom tag for the image."
 }
 
-url_prefix="http://127.0.0.1:5000"
+url_prefix="http://127.0.0.1:8080"
 push=false
 image_path=""
 use_git_tag=false
