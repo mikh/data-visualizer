@@ -15,7 +15,7 @@ COPY deps ./deps
 COPY postcss.config.js ./
 
 ENV VITE_URL_PREFIX=${URL_PREFIX}
-ENV REACT_VERSION=${REACT_VERSION}
+ENV VITE_REACT_VERSION=${REACT_VERSION}
 
 RUN npm install
 RUN npm install -g serve

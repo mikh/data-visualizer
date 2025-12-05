@@ -29,6 +29,8 @@ spec:
           env:
             - name: VITE_URL_PREFIX
               value: https://{{ .Values.ingress.host }}
+            - name: VITE_REACT_VERSION
+              value: {{ .Values.image.react.tag | quote }}
           livenessProbe:
             httpGet:
               path: /
