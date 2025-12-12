@@ -1,9 +1,15 @@
 """Module models contains the models for the metadata database."""
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 
 from sqlalchemy import String, Table, Column, Integer, ForeignKey, Float
-from sqlalchemy.orm import Mapped, mapped_column, declarative_base, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    declarative_base,
+    relationship,
+    Session,
+)
 
 Base = declarative_base()
 
@@ -15,10 +21,63 @@ file_tags = Table(
 )
 
 
-class FileMetadata(Base):  # pylint: disable=too-few-public-methods
+class BaseModel(Base):
+    """Base model for all models."""
+
+    __abstract__ = True
+    _primary_key: str = None
+
+    @classmethod
+    def get_primary_key(cls) -> str:
+        """Get the primary key for the model."""
+        return cls._primary_key
+
+    @classmethod
+    def find_by_key(
+        cls, session: Session, key: str, value: Any
+    ) -> Union[None, "BaseModel"]:
+        """Find a model object by key."""
+        return session.query(cls).filter(getattr(cls, key) == value).first()
+
+    @classmethod
+    def find_by_primary_key(
+        cls, session: Session, value: Any
+    ) -> Union[None, "BaseModel"]:
+        """Find a model object by primary key."""
+        return cls.find_by_key(session, cls.get_primary_key(), value)
+
+    @classmethod
+    def create_new(cls, session: Session, data: Dict[str, Any]) -> "BaseModel":
+        """Create a new model object."""
+        object = cls(**data)
+        session.add(object)
+        session.flush()
+        return object
+
+    @classmethod
+    def create_or_get(
+        cls, session: Session, data: Dict[str, Any]
+    ) -> Union[None, "BaseModel"]:
+        """Create or get a model object."""
+        value = data.get(cls.get_primary_key(), None)
+        if value is None:
+            return None
+        object = cls.find_by_primary_key(session, value)
+        if object is None:
+            object = cls.create_new(session, data)
+        return object
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert the model object to a dictionary."""
+        columns = [column.name for column in self.__table__.columns]
+        return {column: getattr(self, column) for column in columns}
+
+
+class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
     """Model for file metadata."""
 
     __tablename__ = "file_metadata"
+    _primary_key = "path"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
@@ -52,11 +111,25 @@ class FileMetadata(Base):  # pylint: disable=too-few-public-methods
         """Get the tags for the file metadata."""
         return [tag.name for tag in self.tags]
 
+    @classmethod
+    def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileMetadata":
+        """Create a new file metadata object."""
+        tags = data.pop("tags", [])
+        file_metadata_object = cls(**data)
+        session.add(file_metadata_object)
+        session.flush()
+        for tag in tags:
+            tag_object = Tag.create_or_get(session, {"name": tag})
+            if tag_object not in file_metadata_object.tags:
+                file_metadata_object.tags.append(tag_object)
+        return file_metadata_object
 
-class Tag(Base):  # pylint: disable=too-few-public-methods
+
+class Tag(BaseModel):  # pylint: disable=too-few-public-methods
     """Tag Model."""
 
     __tablename__ = "tag"
+    _primary_key = "name"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
@@ -67,22 +140,17 @@ class Tag(Base):  # pylint: disable=too-few-public-methods
         back_populates="tags",
     )
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert the tag to a dictionary."""
-        return {
-            "id": self.id,
-            "name": self.name,
-        }
 
-
-class FileStats(Base):  # pylint: disable=too-few-public-methods
+class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
     """File Stats Model.
     This model is used to store the statistics for a given file.
     """
 
     __tablename__ = "file_stats"
+    _primary_key = "path"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    path: Mapped[str] = mapped_column(String, nullable=False)
     file_metadata_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("file_metadata.id"), nullable=False, unique=True
     )
@@ -100,11 +168,36 @@ class FileStats(Base):  # pylint: disable=too-few-public-methods
         back_populates="file_stats",
     )
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the file stats to a dictionary."""
+        return {
+            "id": self.id,
+            "num_columns": self.num_columns,
+            "num_rows": self.num_rows,
+            "column_stats": [
+                column_stat.to_dict() for column_stat in self.column_stats
+            ],
+        }
 
-class ColumnStats(Base):  # pylint: disable=too-few-public-methods
+    @classmethod
+    def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileStats":
+        """Create a new file stats object."""
+        column_stats = data.pop("column_stats", [])
+        file_stats_object = cls(**data)
+        session.add(file_stats_object)
+        session.flush()
+        for column_stat in column_stats:
+            column_stat_object = ColumnStats.create_new(session, column_stat)
+            if column_stat_object not in file_stats_object.column_stats:
+                file_stats_object.column_stats.append(column_stat_object)
+        return file_stats_object
+
+
+class ColumnStats(BaseModel):  # pylint: disable=too-few-public-methods
     """Column stats model."""
 
     __tablename__ = "column_stats"
+    _primary_key = "column_name"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     file_stats_id: Mapped[int] = mapped_column(

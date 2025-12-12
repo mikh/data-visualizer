@@ -15,6 +15,8 @@ TEST_DB_JSON_PATH = os.environ.get(
     "TEST_DB_JSON_PATH", os.path.join("flask", "tests", "testdata", "baseline-db.json")
 )
 
+# TODO: Update tests for model/db_interface rework.
+
 
 def make_test_db(empty: bool = False) -> Engine:
     """Make a test database."""
