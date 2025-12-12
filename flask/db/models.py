@@ -14,13 +14,6 @@ file_tags = Table(
     Column("tag_id", Integer, ForeignKey("tag.id"), primary_key=True),
 )
 
-file_column_stats = Table(
-    "file_column_stats",
-    Base.metadata,
-    Column("file_stats_id", Integer, ForeignKey("file_stats.id"), primary_key=True),
-    Column("column_stats_id", Integer, ForeignKey("column_stats.id"), primary_key=True),
-)
-
 
 class FileMetadata(Base):  # pylint: disable=too-few-public-methods
     """Model for file metadata."""
@@ -90,13 +83,20 @@ class FileStats(Base):  # pylint: disable=too-few-public-methods
     __tablename__ = "file_stats"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    file_metadata_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("file_metadata.id"), nullable=False, unique=True
+    )
 
     num_columns: Mapped[int] = mapped_column(Integer, nullable=False)
     num_rows: Mapped[int] = mapped_column(Integer, nullable=False)
 
+    file_metadata: Mapped["FileMetadata"] = relationship(
+        "FileMetadata",
+        back_populates="file_stats",
+    )
+
     column_stats: Mapped[List["ColumnStats"]] = relationship(
         "ColumnStats",
-        secondary="file_column_stats",
         back_populates="file_stats",
     )
 
@@ -107,6 +107,9 @@ class ColumnStats(Base):  # pylint: disable=too-few-public-methods
     __tablename__ = "column_stats"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    file_stats_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("file_stats.id"), nullable=False
+    )
     column_name: Mapped[str] = mapped_column(String, nullable=False)
     data_type: Mapped[str] = mapped_column(String, nullable=False)
     num_rows: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -114,18 +117,17 @@ class ColumnStats(Base):  # pylint: disable=too-few-public-methods
     num_null_values: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Numeric stats
-    num_zeros_values: Mapped[int] = mapped_column(Integer, nullable=False)
-    std_dev: Mapped[float] = mapped_column(Float, nullable=False)
-    mean: Mapped[float] = mapped_column(Float, nullable=False)
-    median: Mapped[float] = mapped_column(Float, nullable=False)
-    min_value: Mapped[float] = mapped_column(Float, nullable=False)
-    max_value: Mapped[float] = mapped_column(Float, nullable=False)
+    num_zeros_values: Mapped[int] = mapped_column(Integer, default=0)
+    std_dev: Mapped[float] = mapped_column(Float, default=0.0)
+    mean: Mapped[float] = mapped_column(Float, default=0.0)
+    median: Mapped[float] = mapped_column(Float, default=0.0)
+    min_value: Mapped[float] = mapped_column(Float, default=0.0)
+    max_value: Mapped[float] = mapped_column(Float, default=0.0)
 
     # Categorical stats
-    num_empty_values: Mapped[int] = mapped_column(Integer, nullable=False)
+    num_empty_values: Mapped[int] = mapped_column(Integer, default=0)
 
     file_stats: Mapped["FileStats"] = relationship(
         "FileStats",
-        secondary="file_column_stats",
         back_populates="column_stats",
     )
