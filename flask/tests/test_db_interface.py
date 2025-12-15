@@ -1,6 +1,6 @@
 """Module test_db_interface contains tests for the db_interface module."""
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import os
 import json
@@ -15,6 +15,15 @@ TEST_DB_JSON_PATH = os.environ.get(
     "TEST_DB_JSON_PATH", os.path.join("flask", "tests", "testdata", "baseline-db.json")
 )
 
+
+def load_test_db_data() -> Dict[str, Any]:
+    """Load test database data."""
+    with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+TEST_DB_DATA = load_test_db_data()
+
 # TODO: Update tests for model/db_interface rework.
 
 
@@ -24,10 +33,159 @@ def make_test_db(empty: bool = False) -> Engine:
 
     if not empty:
         with Session(engine) as session:
-            with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
-                test_db_json = json.load(file)
-            db_interface.mass_add_objects(session, test_db_json)
+            db_interface.mass_add_objects(session, TEST_DB_DATA)
     return engine
+
+
+@pytest.mark.parametrize(
+    "model_name, want",
+    [
+        ("file_metadata", TEST_DB_DATA["file_metadata"]),
+        ("tag", ["tag-1", "tag-2"]),
+        (
+            "file_stats",
+            [
+                {
+                    "path": "test-folder-1/test-file-1",
+                    "num_columns": 2,
+                    "num_rows": 2,
+                    "column_stats": [
+                        {
+                            "column_name": "column-1",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                        {
+                            "column_name": "column-2",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                    ],
+                },
+                {
+                    "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                    "num_columns": 2,
+                    "num_rows": 2,
+                    "column_stats": [
+                        {
+                            "column_name": "column-1",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                        {
+                            "column_name": "column-2",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                    ],
+                },
+            ],
+        ),
+        (
+            "column_stats",
+            [
+                {
+                    "column_name": "column-1",
+                    "data_type": "string",
+                    "num_rows": 2,
+                    "num_unique_values": 2,
+                    "num_null_values": 0,
+                    "num_zeros_values": 0,
+                    "std_dev": 0.0,
+                    "mean": 0.0,
+                    "median": 0.0,
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "num_empty_values": 0,
+                },
+                {
+                    "column_name": "column-2",
+                    "data_type": "string",
+                    "num_rows": 2,
+                    "num_unique_values": 2,
+                    "num_null_values": 0,
+                    "num_zeros_values": 0,
+                    "std_dev": 0.0,
+                    "mean": 0.0,
+                    "median": 0.0,
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "num_empty_values": 0,
+                },
+                {
+                    "column_name": "column-1",
+                    "data_type": "string",
+                    "num_rows": 2,
+                    "num_unique_values": 2,
+                    "num_null_values": 0,
+                    "num_zeros_values": 0,
+                    "std_dev": 0.0,
+                    "mean": 0.0,
+                    "median": 0.0,
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "num_empty_values": 0,
+                },
+                {
+                    "column_name": "column-2",
+                    "data_type": "string",
+                    "num_rows": 2,
+                    "num_unique_values": 2,
+                    "num_null_values": 0,
+                    "num_zeros_values": 0,
+                    "std_dev": 0.0,
+                    "mean": 0.0,
+                    "median": 0.0,
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "num_empty_values": 0,
+                },
+            ],
+        ),
+    ],
+)
+def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
+    """Test get_all_of_model function."""
+    engine = make_test_db()
+    output_objects = db_interface.get_all_of_model(engine, model_name)
+
+    assert output_objects == want
 
 
 def test_get_tag_list():

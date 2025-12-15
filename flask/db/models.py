@@ -105,6 +105,7 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
             "data_file_type": self.data_file_type,
             "data_file_path": self.data_file_path,
             "tags": self.get_tags(),
+            "file_stats": self.file_stats.to_dict() if self.file_stats else None,
         }
 
     def get_tags(self) -> List[str]:
@@ -115,6 +116,7 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
     def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileMetadata":
         """Create a new file metadata object."""
         tags = data.pop("tags", [])
+        file_stats = data.pop("file_stats", {})
         file_metadata_object = cls(**data)
         session.add(file_metadata_object)
         session.flush()
@@ -122,6 +124,9 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
             tag_object = Tag.create_or_get(session, {"name": tag})
             if tag_object not in file_metadata_object.tags:
                 file_metadata_object.tags.append(tag_object)
+        if file_stats:
+            file_stats_object = FileStats.create_new(session, file_stats)
+            file_metadata_object.file_stats = file_stats_object
         return file_metadata_object
 
 
@@ -152,7 +157,7 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
     id: Mapped[int] = mapped_column(primary_key=True)
     path: Mapped[str] = mapped_column(String, nullable=False)
     file_metadata_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("file_metadata.id"), nullable=False, unique=True
+        Integer, ForeignKey("file_metadata.id"), unique=True, nullable=True
     )
 
     num_columns: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -201,7 +206,7 @@ class ColumnStats(BaseModel):  # pylint: disable=too-few-public-methods
 
     id: Mapped[int] = mapped_column(primary_key=True)
     file_stats_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("file_stats.id"), nullable=False
+        Integer, ForeignKey("file_stats.id"), nullable=True
     )
     column_name: Mapped[str] = mapped_column(String, nullable=False)
     data_type: Mapped[str] = mapped_column(String, nullable=False)
