@@ -49,10 +49,10 @@ class BaseModel(Base):
     @classmethod
     def create_new(cls, session: Session, data: Dict[str, Any]) -> "BaseModel":
         """Create a new model object."""
-        object = cls(**data)
-        session.add(object)
+        obj = cls(**data)
+        session.add(obj)
         session.flush()
-        return object
+        return obj
 
     @classmethod
     def create_or_get(
@@ -62,14 +62,16 @@ class BaseModel(Base):
         value = data.get(cls.get_primary_key(), None)
         if value is None:
             return None
-        object = cls.find_by_primary_key(session, value)
-        if object is None:
-            object = cls.create_new(session, data)
-        return object
+        obj = cls.find_by_primary_key(session, value)
+        if obj is None:
+            obj = cls.create_new(session, data)
+        return obj
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert the model object to a dictionary."""
-        columns = [column.name for column in self.__table__.columns]
+        columns = [
+            column.name for column in self.__table__.columns if column.name != "id"
+        ]
         return {column: getattr(self, column) for column in columns}
 
 
@@ -99,7 +101,6 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
     def to_dict(self) -> Dict[str, Any]:
         """Convert the file metadata to a dictionary."""
         return {
-            "id": self.id,
             "name": self.name,
             "path": self.path,
             "data_file_type": self.data_file_type,
@@ -176,7 +177,7 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
     def to_dict(self) -> Dict[str, Any]:
         """Converts the file stats to a dictionary."""
         return {
-            "id": self.id,
+            "path": self.path,
             "num_columns": self.num_columns,
             "num_rows": self.num_rows,
             "column_stats": [
@@ -229,3 +230,9 @@ class ColumnStats(BaseModel):  # pylint: disable=too-few-public-methods
         "FileStats",
         back_populates="column_stats",
     )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the column stats to a dictionary."""
+        output = super().to_dict()
+        output.pop("file_stats_id")
+        return output

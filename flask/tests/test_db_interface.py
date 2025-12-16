@@ -1,9 +1,10 @@
 """Module test_db_interface contains tests for the db_interface module."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import os
 import json
+import copy
 
 import pytest
 from sqlalchemy import Engine
@@ -33,15 +34,62 @@ def make_test_db(empty: bool = False) -> Engine:
 
     if not empty:
         with Session(engine) as session:
-            db_interface.mass_add_objects(session, TEST_DB_DATA)
+            db_interface.mass_add_objects(session, copy.deepcopy(TEST_DB_DATA))
     return engine
+
+
+def strip_id_from_dict(data: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+    """Strip the id from the data."""
+    if isinstance(data, list):
+        for item in data:
+            if isinstance(item, dict) or isinstance(item, list):
+                item = strip_id_from_dict(item, keys)
+    elif isinstance(data, dict):
+        for key, value in data.items():
+            if key in keys:
+                continue
+            if isinstance(value, dict) or isinstance(value, list):
+                value = strip_id_from_dict(value, keys)
+        data[key] = value
+    return data
+
+
+def dict_compare(a: Any, b: Any) -> bool:
+    """Compare two dictionaries or lists."""
+    assert isinstance(a, type(b)), f"Types do not match {type(a)} != {type(b)}"
+    if isinstance(a, dict):
+        assert sorted(a.keys()) == sorted(
+            b.keys()
+        ), f"Keys do not match: {sorted(a.keys())} != {sorted(b.keys())}"
+        for key in a.keys():
+            assert isinstance(
+                a[key], type(b[key])
+            ), f"Types do not match for key {key}: {type(a[key])} != {type(b[key])}"
+            if isinstance(a[key], (dict, list)):
+                dict_compare(a[key], b[key])
+            else:
+                assert (
+                    a[key] == b[key]
+                ), f"Values do not match for key {key}: {a[key]} != {b[key]}"
+    elif isinstance(a, list):
+        assert len(a) == len(b), f"Lengths do not match: {len(a)} != {len(b)}"
+        for i, item in enumerate(a):
+            if isinstance(item, (dict, list)):
+                dict_compare(item, b[i])
+            else:
+                assert (
+                    item == b[i]
+                ), f"Values do not match for index {i}: {item} != {b[i]}"
+    else:
+        assert a == b, f"Values do not match: {a} != {b}"
+    return True
 
 
 @pytest.mark.parametrize(
     "model_name, want",
     [
         ("file_metadata", TEST_DB_DATA["file_metadata"]),
-        ("tag", ["tag-1", "tag-2"]),
+        ("tag", [{"name": "tag-1"}, {"name": "tag-2"}]),
         (
             "file_stats",
             [
@@ -184,8 +232,10 @@ def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
     """Test get_all_of_model function."""
     engine = make_test_db()
     output_objects = db_interface.get_all_of_model(engine, model_name)
-
-    assert output_objects == want
+    # output_objects = [
+    #     strip_id_from_dict(obj, ["id", "file_stats_id"]) for obj in output_objects
+    # ]
+    dict_compare(output_objects, want)
 
 
 def test_get_tag_list():
