@@ -38,22 +38,6 @@ def make_test_db(empty: bool = False) -> Engine:
     return engine
 
 
-def strip_id_from_dict(data: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
-    """Strip the id from the data."""
-    if isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict) or isinstance(item, list):
-                item = strip_id_from_dict(item, keys)
-    elif isinstance(data, dict):
-        for key, value in data.items():
-            if key in keys:
-                continue
-            if isinstance(value, dict) or isinstance(value, list):
-                value = strip_id_from_dict(value, keys)
-        data[key] = value
-    return data
-
-
 def dict_compare(a: Any, b: Any) -> bool:
     """Compare two dictionaries or lists."""
     assert isinstance(a, type(b)), f"Types do not match {type(a)} != {type(b)}"
@@ -232,9 +216,6 @@ def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
     """Test get_all_of_model function."""
     engine = make_test_db()
     output_objects = db_interface.get_all_of_model(engine, model_name)
-    # output_objects = [
-    #     strip_id_from_dict(obj, ["id", "file_stats_id"]) for obj in output_objects
-    # ]
     dict_compare(output_objects, want)
 
 
