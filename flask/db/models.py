@@ -189,6 +189,7 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
     def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileStats":
         """Create a new file stats object."""
         column_stats = data.pop("column_stats", [])
+        print(data)
         file_stats_object = cls(**data)
         session.add(file_stats_object)
         session.flush()

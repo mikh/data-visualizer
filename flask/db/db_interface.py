@@ -69,11 +69,17 @@ def mass_add_objects(session: Session, objects: Dict[str, List[Dict[str, Any]]])
         session.commit()
 
 
-def export_db_objects(session: Session) -> Dict[str, List[Dict[str, Any]]]:
-    """Export database objects to a dictionary."""
+def export_db_objects(
+    engine: Engine, export_all: bool = False
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Export database objects to a dictionary.
+    Since file_metadata is the top level object, we only use that to export."""
     objects = {}
-    for table_name in Base.metadata.tables.keys():
-        objects[table_name] = get_all_of_model(session, table_name)
+    tables = ["file_metadata"]
+    if export_all:
+        tables = Base.metadata.tables.keys()
+    for table_name in tables:
+        objects[table_name] = get_all_of_model(engine, table_name)
     return objects
 
 
