@@ -25,7 +25,7 @@ logger = logging_helper.init_logging(
 
 def get_all_tags(engine: Engine) -> Union[List[str]]:
     """Gets all tags from the database."""
-    return db_interface.get_tag_list(engine)
+    return [tag["name"] for tag in db_interface.get_all_of_model(engine, "tag")]
 
 
 def list_tree(
@@ -34,8 +34,8 @@ def list_tree(
     """List all files and folders in the tree."""
     logger.debug("control=%s", "list")
 
-    files = db_interface.get_file_list(engine)
-    tags = db_interface.get_tag_list(engine)
+    files = db_interface.get_all_of_model(engine, "file_metadata")
+    tags = get_all_tags(engine)
 
     structure = {}
     for file in files:
@@ -152,14 +152,16 @@ def copy(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
         if dest_file_metadata is not None:
             logger.error("Dest file metadata already exists for path %s.", dest)
             return {"error": f"Dest file metadata already exists for path {dest}."}
-        db_interface.create_or_get_file_metadata(
+        db_interface.create_or_get_object(
             session,
+            "file_metadata",
             {
+                **source_file_metadata.to_dict(),
                 "path": dest,
-                "name": source_file_metadata.name,
-                "data_file_type": source_file_metadata.data_file_type,
-                "data_file_path": source_file_metadata.data_file_path,
-                "tags": source_file_metadata.get_tags(),
+                "file_stats": {
+                    **source_file_metadata.file_stats.to_dict(),
+                    "path": dest,
+                },
             },
         )
         session.commit()
@@ -237,8 +239,9 @@ def upload(
         logger.info("Upload file at %s. Saving data file to %s.", path, full_path)
         file.save(full_path)
 
-        db_interface.create_or_get_file_metadata(
+        db_interface.create_or_get_object(
             session,
+            "file_metadata",
             {
                 "name": os.path.basename(path),
                 "path": path,
@@ -267,6 +270,7 @@ def update(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
             return {"error": f"File metadata not found for path {path}."}
 
         tags = request_json.get("tags", None)
+        file_stats = request_json.get("file_stats", None)
         update_data = {
             "name": request_json.get("name", None),
             "data_file_type": request_json.get("data_file_type", None),
@@ -278,7 +282,13 @@ def update(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
         if tags is not None:
             file_metadata.tags = []
             for tag in tags:
-                db_tag = db_interface.create_or_get_tag(session, tag)
+                db_tag = db_interface.create_or_get_object(
+                    session, "tag", {"name": tag}
+                )
                 file_metadata.tags.append(db_tag)
+        if file_stats is not None:
+            file_metadata.file_stats = db_interface.create_or_get_object(
+                session, "file_stats", file_stats
+            )
         session.commit()
     return {}

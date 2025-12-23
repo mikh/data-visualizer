@@ -493,12 +493,46 @@ def test_copy(
         (
             {"path": "test-folder-1/test-file-1"},
             {
-                "id": 1,
                 "name": "test-file-1",
                 "path": "test-folder-1/test-file-1",
                 "data_file_type": "csv",
                 "data_file_path": "test-file-1.csv",
                 "tags": ["tag-1", "tag-2"],
+                "file_stats": {
+                    "path": "test-folder-1/test-file-1",
+                    "num_columns": 2,
+                    "num_rows": 2,
+                    "column_stats": [
+                        {
+                            "column_name": "column-1",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                        {
+                            "column_name": "column-2",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                    ],
+                },
                 "data": [
                     ["column-1", "column-2"],
                     ["value-1", "value-2"],
@@ -619,6 +653,7 @@ _BASELINE_TEST_FILE_1 = {
 }
 
 
+# TODO: Fix test for updating file
 @pytest.mark.parametrize(
     "request_json, want_response, want_object_data",
     [
