@@ -5,10 +5,10 @@ from typing import List, Dict, Any, Union
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 
-from db.models import Base, Tag, FileMetadata, FileStats, ColumnStats
+from db.models import Base, BaseModel, Tag, FileMetadata, FileStats, ColumnStats
 
 
-def _name_to_model(model_name: str) -> Union[Any, None]:
+def _name_to_model(model_name: str) -> Union["BaseModel", None]:
     """Convert a model name to a model class."""
     match model_name:
         case "file_metadata":
@@ -90,3 +90,19 @@ def get_object_counts(engine: Engine) -> Dict[str, int]:
             table.name: session.query(table).count()
             for table in Base.metadata.tables.values()
         }
+
+
+def update_object(engine: Engine, model_name: str, new_data: Dict[str, Any]) -> str:
+    """Update object in db."""
+    with Session(engine) as session:
+        model = _name_to_model(model_name)
+        if not model:
+            return f"Could not find model class with name: '{model_name}'"
+
+        primary_key = model.get_primary_key()
+        model_object = model.find_by_primary_key(session, new_data.get(primary_key))
+        if not model_object:
+            return "Could not find model object."
+        model_object.update_object(session, new_data)
+        session.commit()
+    return ""

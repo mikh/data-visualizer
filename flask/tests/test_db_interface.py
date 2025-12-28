@@ -99,7 +99,7 @@ def dict_compare(a: Any, b: Any) -> bool:
                             "num_empty_values": 0,
                         },
                         {
-                            "column_name": "column-2",
+                            "column_name": "column-5",
                             "data_type": "string",
                             "num_rows": 2,
                             "num_unique_values": 2,
@@ -169,7 +169,7 @@ def dict_compare(a: Any, b: Any) -> bool:
                     "num_empty_values": 0,
                 },
                 {
-                    "column_name": "column-2",
+                    "column_name": "column-5",
                     "data_type": "string",
                     "num_rows": 2,
                     "num_unique_values": 2,
@@ -254,7 +254,7 @@ def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
                             "num_empty_values": 0,
                         },
                         {
-                            "column_name": "column-2",
+                            "column_name": "column-5",
                             "data_type": "string",
                             "num_rows": 2,
                             "num_unique_values": 2,
@@ -296,7 +296,7 @@ def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
                         "num_empty_values": 0,
                     },
                     {
-                        "column_name": "column-2",
+                        "column_name": "column-5",
                         "data_type": "string",
                         "num_rows": 2,
                         "num_unique_values": 2,
@@ -502,3 +502,362 @@ def test_export_db_objects(export_all: bool, want_path: str):
     with open(want_path, "r", encoding="utf-8") as file:
         want_db_objects = json.load(file)
     assert dict_compare(output_db_objects, want_db_objects)
+
+
+@pytest.mark.parametrize(
+    "model_name, new_data, want_output, want_data, want_object_counts",
+    [
+        (
+            "fake-model",
+            {},
+            "Could not find model class with name: 'fake-model'",
+            {},
+            {},
+        ),
+        ("file_metadata", {}, "Could not find model object.", {}, {}),
+        (
+            "file_metadata",
+            {"path": "test-file-2", "data_file_type": "new-type"},
+            "",
+            {
+                "name": "test-file-2",
+                "path": "test-file-2",
+                "data_file_type": "new-type",
+                "data_file_path": "data-folder-1/test-file-2.json",
+                "tags": ["tag-1"],
+                "file_stats": None,
+            },
+            {},
+        ),
+        (
+            "file_metadata",
+            {
+                "path": "test-file-2",
+                "data_file_type": "new-type",
+                "tags": ["tag-2", "tag-3"],
+            },
+            "",
+            {
+                "name": "test-file-2",
+                "path": "test-file-2",
+                "data_file_type": "new-type",
+                "data_file_path": "data-folder-1/test-file-2.json",
+                "tags": ["tag-2", "tag-3"],
+                "file_stats": None,
+            },
+            {"tag": 3, "file_tags": 4},
+        ),
+        (
+            "file_metadata",
+            {
+                "path": "test-file-2",
+                "data_file_type": "new-type",
+                "tags": ["tag-2", "tag-3"],
+                "file_stats": {"path": "test-file-2", "num_columns": 3, "num_rows": 4},
+            },
+            "",
+            {
+                "name": "test-file-2",
+                "path": "test-file-2",
+                "data_file_type": "new-type",
+                "data_file_path": "data-folder-1/test-file-2.json",
+                "tags": ["tag-2", "tag-3"],
+                "file_stats": {
+                    "path": "test-file-2",
+                    "num_columns": 3,
+                    "num_rows": 4,
+                    "column_stats": [],
+                },
+            },
+            {"tag": 3, "file_tags": 4, "file_stats": 3},
+        ),
+        (
+            "file_metadata",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "data_file_type": "new-type",
+                "file_stats": {
+                    "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                    "num_columns": 5,
+                    "num_rows": 6,
+                },
+            },
+            "",
+            {
+                "name": "test-file-5",
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "data_file_type": "new-type",
+                "data_file_path": "test-file-5.csv",
+                "tags": [],
+                "file_stats": {
+                    "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                    "num_columns": 5,
+                    "num_rows": 6,
+                    "column_stats": [
+                        {
+                            "column_name": "column-1",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                        {
+                            "column_name": "column-2",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                    ],
+                },
+            },
+            {},
+        ),
+        (
+            "file_stats",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "num_columns": 5,
+                "num_rows": 6,
+            },
+            "",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "num_columns": 5,
+                "num_rows": 6,
+                "column_stats": [
+                    {
+                        "column_name": "column-1",
+                        "data_type": "string",
+                        "num_rows": 2,
+                        "num_unique_values": 2,
+                        "num_null_values": 0,
+                        "num_zeros_values": 0,
+                        "std_dev": 0.0,
+                        "mean": 0.0,
+                        "median": 0.0,
+                        "min_value": 0.0,
+                        "max_value": 0.0,
+                        "num_empty_values": 0,
+                    },
+                    {
+                        "column_name": "column-2",
+                        "data_type": "string",
+                        "num_rows": 2,
+                        "num_unique_values": 2,
+                        "num_null_values": 0,
+                        "num_zeros_values": 0,
+                        "std_dev": 0.0,
+                        "mean": 0.0,
+                        "median": 0.0,
+                        "min_value": 0.0,
+                        "max_value": 0.0,
+                        "num_empty_values": 0,
+                    },
+                ],
+            },
+            {},
+        ),
+        (
+            "file_stats",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "num_columns": 5,
+                "num_rows": 6,
+                "column_stats": [
+                    {
+                        "column_name": "column-1",
+                        "data_type": "new-type",
+                        "num_rows": 2,
+                    },
+                    {
+                        "column_name": "column-2",
+                    },
+                ],
+            },
+            "",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "num_columns": 5,
+                "num_rows": 6,
+                "column_stats": [
+                    {
+                        "column_name": "column-1",
+                        "data_type": "new-type",
+                        "num_rows": 2,
+                        "num_unique_values": 2,
+                        "num_null_values": 0,
+                        "num_zeros_values": 0,
+                        "std_dev": 0.0,
+                        "mean": 0.0,
+                        "median": 0.0,
+                        "min_value": 0.0,
+                        "max_value": 0.0,
+                        "num_empty_values": 0,
+                    },
+                    {
+                        "column_name": "column-2",
+                        "data_type": "string",
+                        "num_rows": 2,
+                        "num_unique_values": 2,
+                        "num_null_values": 0,
+                        "num_zeros_values": 0,
+                        "std_dev": 0.0,
+                        "mean": 0.0,
+                        "median": 0.0,
+                        "min_value": 0.0,
+                        "max_value": 0.0,
+                        "num_empty_values": 0,
+                    },
+                ],
+            },
+            {},
+        ),
+        (
+            "file_stats",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "num_columns": 5,
+                "num_rows": 6,
+                "column_stats": [
+                    {
+                        "column_name": "column-1",
+                        "data_type": "new-type",
+                        "num_rows": 2,
+                    },
+                    {
+                        "column_name": "column-3",
+                        "data_type": "integer",
+                        "num_rows": 6,
+                        "num_unique_values": 7,
+                        "num_null_values": 8,
+                        "num_zeros_values": 9,
+                        "std_dev": 10.0,
+                        "mean": 11.0,
+                        "median": 12.0,
+                        "min_value": 13.0,
+                        "max_value": 14.0,
+                        "num_empty_values": 15,
+                    },
+                ],
+            },
+            "",
+            {
+                "path": "test-folder-3/test-sub-folder-1/test-file-5",
+                "num_columns": 5,
+                "num_rows": 6,
+                "column_stats": [
+                    {
+                        "column_name": "column-1",
+                        "data_type": "new-type",
+                        "num_rows": 2,
+                        "num_unique_values": 2,
+                        "num_null_values": 0,
+                        "num_zeros_values": 0,
+                        "std_dev": 0.0,
+                        "mean": 0.0,
+                        "median": 0.0,
+                        "min_value": 0.0,
+                        "max_value": 0.0,
+                        "num_empty_values": 0,
+                    },
+                    {
+                        "column_name": "column-3",
+                        "data_type": "integer",
+                        "num_rows": 6,
+                        "num_unique_values": 7,
+                        "num_null_values": 8,
+                        "num_zeros_values": 9,
+                        "std_dev": 10.0,
+                        "mean": 11.0,
+                        "median": 12.0,
+                        "min_value": 13.0,
+                        "max_value": 14.0,
+                        "num_empty_values": 15,
+                    },
+                ],
+            },
+            {"column_stats": 5},
+        ),
+        (
+            "column_stats",
+            {
+                "column_name": "column-5",
+                "num_rows": 5,
+                "num_unique_values": 3,
+            },
+            "",
+            {
+                "column_name": "column-5",
+                "data_type": "string",
+                "num_rows": 5,
+                "num_unique_values": 3,
+                "num_null_values": 0,
+                "num_zeros_values": 0,
+                "std_dev": 0.0,
+                "mean": 0.0,
+                "median": 0.0,
+                "min_value": 0.0,
+                "max_value": 0.0,
+                "num_empty_values": 0,
+            },
+            {},
+        ),
+    ],
+    ids=[
+        "fake-model-name",
+        "no-model-object-primary-key",
+        "file-metadata-simple-update",
+        "file-metadata-tag-update",
+        "file-metadata-add-file-stats",
+        "file-metadata-update-file-stats",
+        "file-stats-simple-update",
+        "file-stats-column-in-place-update",
+        "file-stats-column-add-and-remove",
+        "column-stats-simple-update",
+    ],
+)
+def test_update_object(
+    model_name: str,
+    new_data: Dict[str, Any],
+    want_output: str,
+    want_data: Dict[str, Any],
+    want_object_counts: Dict[str, int],
+):
+    """Tests the update_object function."""
+    engine = make_test_db()
+
+    initial_object_counts = db_interface.get_object_counts(engine)
+
+    assert db_interface.update_object(engine, model_name, new_data) == want_output
+    if not want_output:
+        with Session(engine) as session:
+            model_class = (
+                db_interface._name_to_model(  # pylint: disable=protected-access
+                    model_name
+                )
+            )
+            primary_key = model_class.get_primary_key()
+            model_object = model_class.find_by_primary_key(
+                session, new_data.get(primary_key)
+            )
+            assert dict_compare(model_object.to_dict(), want_data)
+
+    assert dict_compare(
+        db_interface.get_object_counts(engine),
+        {**initial_object_counts, **want_object_counts},
+    )

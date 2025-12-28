@@ -27,7 +27,7 @@
             "num_empty_values": 0
           },
           {
-            "column_name": "column-2",
+            "column_name": "column-5",
             "data_type": "string",
             "num_rows": 2,
             "num_unique_values": 2,
@@ -132,7 +132,7 @@
           "num_empty_values": 0
         },
         {
-          "column_name": "column-2",
+          "column_name": "column-5",
           "data_type": "string",
           "num_rows": 2,
           "num_unique_values": 2,
@@ -199,7 +199,7 @@
       "num_empty_values": 0
     },
     {
-      "column_name": "column-2",
+      "column_name": "column-5",
       "data_type": "string",
       "num_rows": 2,
       "num_unique_values": 2,

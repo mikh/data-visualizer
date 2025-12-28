@@ -74,6 +74,12 @@ class BaseModel(Base):
         ]
         return {column: getattr(self, column) for column in columns}
 
+    def update_object(self, session: Session, new_data: Dict[str, Any]):
+        """Update object with new data."""
+        for key, value in new_data.items():
+            setattr(self, key, value)
+        session.flush()
+
 
 class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
     """Model for file metadata."""
@@ -129,6 +135,25 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
             file_stats_object = FileStats.create_new(session, file_stats)
             file_metadata_object.file_stats = file_stats_object
         return file_metadata_object
+
+    def update_object(self, session: Session, new_data: Dict[str, Any]):
+        tags = new_data.pop("tags", None)
+        file_stats = new_data.pop("file_stats", None)
+        super().update_object(session, new_data)
+
+        if tags is not None:
+            new_tags = []
+            for tag in tags:
+                tag_object = Tag.create_or_get(session, {"name": tag})
+                new_tags.append(tag_object)
+            self.tags = new_tags
+
+        if file_stats is not None:
+            if self.file_stats:
+                self.file_stats.update_object(session, file_stats)
+            else:
+                file_stats_object = FileStats.create_new(session, file_stats)
+                self.file_stats = file_stats_object
 
 
 class Tag(BaseModel):  # pylint: disable=too-few-public-methods
@@ -198,6 +223,29 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
             if column_stat_object not in file_stats_object.column_stats:
                 file_stats_object.column_stats.append(column_stat_object)
         return file_stats_object
+
+    def find_column(self, column_name: str) -> Union["ColumnStats", None]:
+        """Find a ColumnStats object by column name."""
+        if self.column_stats:
+            for column in self.column_stats:
+                if column.column_name == column_name:
+                    return column
+        return None
+
+    def update_object(self, session: Session, new_data: Dict[str, Any]):
+        column_stats = new_data.pop("column_stats", None)
+        super().update_object(session, new_data)
+
+        if column_stats is not None:
+            new_column_stats = []
+            for column in column_stats:
+                existing_column = self.find_column(column.get("column_name"))
+                if existing_column:
+                    existing_column.update_object(session, column)
+                    new_column_stats.append(existing_column)
+                else:
+                    new_column_stats.append(ColumnStats.create_new(session, column))
+            self.column_stats = new_column_stats
 
 
 class ColumnStats(BaseModel):  # pylint: disable=too-few-public-methods
