@@ -9,16 +9,13 @@ import {
   uploadFile,
 } from "./FileManagerInterface";
 
-export default function FileManager() {
+export default function FileManager({ setLoadedFile }) {
   const [structure, setStructure] = useState(null);
   const [tags, setTags] = useState([]);
-  const [loaded_file, setLoadedFile] = useState(null);
 
   useEffect(() => {
     loadTree(setStructure, setTags);
   }, []);
-
-  console.log("loaded file", loaded_file);
 
   return (
     <div className="w-full mt-5">

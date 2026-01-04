@@ -129,7 +129,7 @@ export function loadObject(path, loadFile) {
       if (data.error) {
         console.error("Error:", data.error);
       }
-      loadFile(data.data);
+      loadFile(data);
     })
     .catch((error) => console.error("Error:", error));
 }
