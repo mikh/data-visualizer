@@ -61,7 +61,7 @@ class BaseModel(Base):
         """Create or get a model object."""
         value = data.get(cls.get_primary_key(), None)
         if value is None:
-            return None
+            return None  # pragma: no cover
         obj = cls.find_by_primary_key(session, value)
         if obj is None:
             obj = cls.create_new(session, data)
@@ -214,7 +214,6 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
     def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileStats":
         """Create a new file stats object."""
         column_stats = data.pop("column_stats", [])
-        print(data)
         file_stats_object = cls(**data)
         session.add(file_stats_object)
         session.flush()
