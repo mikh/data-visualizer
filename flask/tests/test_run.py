@@ -28,8 +28,6 @@ TEST_DATA_FILE_DIR = os.environ.get(
     "TEST_DATA_FILE_DIR", os.path.join("flask", "untracked", "tests", "data")
 )
 
-# TODO: Update tests for model/db_interface rework.
-
 
 def setup_test_environment():
     """Set up test database and data files."""
