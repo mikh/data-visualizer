@@ -4,6 +4,8 @@ import TagDisplay from "./TagDisplay";
 export default function FileDisplay({ loadedFile }) {
   console.log("loaded file", loadedFile);
 
+  // TODO: Add Raw display of csv data
+
   return (
     <div
       style={{ fontFamily: "Philosopher" }}

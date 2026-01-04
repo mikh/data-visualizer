@@ -21,6 +21,8 @@ export default function FileStats({ fileStats }) {
       .join(" ");
   };
 
+  // TODO: Display columns stats if they exist with highlighting for important stats
+
   return (
     <div className="w-full max-w-2xl mt-6">
       <button
