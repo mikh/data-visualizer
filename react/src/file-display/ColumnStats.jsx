@@ -74,7 +74,7 @@ export default function ColumnStats({ columnStats }) {
   };
 
   return (
-    <div className="w-full max-w-6xl mt-6">
+    <div className="w-full max-w-6xl mt-6 mx-auto">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full flex items-center justify-between bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-t-lg transition-colors"

@@ -24,7 +24,7 @@ export default function FileStats({ fileStats }) {
 
   return (
     <div className="w-full mt-6">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl mx-auto">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="w-full flex items-center justify-between bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-t-lg transition-colors"
