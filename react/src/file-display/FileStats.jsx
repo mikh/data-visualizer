@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ColumnStats from "./ColumnStats";
 
 export default function FileStats({ fileStats }) {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -21,50 +22,55 @@ export default function FileStats({ fileStats }) {
       .join(" ");
   };
 
-  // TODO: Display columns stats if they exist with highlighting for important stats
-
   return (
-    <div className="w-full max-w-2xl mt-6">
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-t-lg transition-colors"
-      >
-        <h2 className="text-lg font-semibold">File Statistics</h2>
-        <span className="text-xl">{isExpanded ? "−" : "+"}</span>
-      </button>
+    <div className="w-full mt-6">
+      <div className="w-full max-w-2xl">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-t-lg transition-colors"
+        >
+          <h2 className="text-lg font-semibold">File Statistics</h2>
+          <span className="text-xl">{isExpanded ? "−" : "+"}</span>
+        </button>
 
-      {isExpanded && (
-        <div className="border border-gray-300 rounded-b-lg overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 border-b">
-                  Property
-                </th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700 border-b">
-                  Value
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {statsToDisplay.map(([key, value], index) => (
-                <tr
-                  key={key}
-                  className={`${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  } hover:bg-blue-100 transition-colors cursor-pointer`}
-                >
-                  <td className="px-4 py-3 border-b border-gray-200 font-medium text-gray-700">
-                    {formatKey(key)}
-                  </td>
-                  <td className="px-4 py-3 border-b border-gray-200 text-gray-600">
-                    {value}
-                  </td>
+        {isExpanded && (
+          <div className="border border-gray-300 rounded-b-lg overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700 border-b">
+                    Property
+                  </th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-700 border-b">
+                    Value
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {statsToDisplay.map(([key, value], index) => (
+                  <tr
+                    key={key}
+                    className={`${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-blue-100 transition-colors cursor-pointer`}
+                  >
+                    <td className="px-4 py-3 border-b border-gray-200 font-medium text-gray-700">
+                      {formatKey(key)}
+                    </td>
+                    <td className="px-4 py-3 border-b border-gray-200 text-gray-600">
+                      {value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Display column statistics if they exist */}
+      {fileStats.column_stats && (
+        <ColumnStats columnStats={fileStats.column_stats} />
       )}
     </div>
   );
