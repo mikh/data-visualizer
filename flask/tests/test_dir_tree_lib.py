@@ -618,12 +618,13 @@ def test_upload_success():
         ]
     )
 
-    assert not dir_tree_lib.upload(
-        engine,
-        {"file": FileStorage(filename="test.csv")},
-        {"path": "test-folder-1/test-6"},
-        data_file_dir=TEST_DATA_FILE_DIR,
-    )
+    with open(os.path.join(TESTDATA_DIR, "test-csv.csv"), "rb") as f:
+        assert not dir_tree_lib.upload(
+            engine,
+            {"file": FileStorage(filename="test.csv", stream=f)},
+            {"path": "test-folder-1/test-6"},
+            data_file_dir=TEST_DATA_FILE_DIR,
+        )
 
     new_structure = copy.deepcopy(_BASE_STRUCTURE)
     new_structure["tree"]["test-folder-1"]["children"]["test-6"] = {

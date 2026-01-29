@@ -1,11 +1,13 @@
 """Module data_interface contains functions to interface with data files."""
 
-from typing import Any, Tuple
+from typing import Any, Tuple, Dict
 
 import os
 import json
 
 import csv
+
+from data import csv_analyzer
 
 
 def load_data_file(
@@ -43,3 +45,14 @@ def new_data_file_path(data_file_type: str, data_file_dir: str) -> str:
         except ValueError:
             continue
     return f"{last_filename}.{data_file_type}"
+
+
+def analyze_data_file(data_file_type: str, data_file_path: str) -> Dict[str, Any]:
+    """Analyzes a data file."""
+    match data_file_type:
+        case "csv":
+            return csv_analyzer.analyze_csv_stats(data_file_path)
+        case "json":
+            raise NotImplementedError
+        case _:
+            raise KeyError(f"Unknown data_file_type '{data_file_type}'")

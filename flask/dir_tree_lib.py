@@ -238,6 +238,8 @@ def upload(
 
         logger.info("Upload file at %s. Saving data file to %s.", path, full_path)
         file.save(full_path)
+        file_stats = data_interface.analyze_data_file(extension, full_path)
+        file_stats["path"] = path
 
         db_interface.create_or_get_object(
             session,
@@ -248,6 +250,7 @@ def upload(
                 "data_file_type": extension,
                 "data_file_path": data_filename,
                 "tags": [],
+                "file_stats": file_stats,
             },
         )
         session.commit()
