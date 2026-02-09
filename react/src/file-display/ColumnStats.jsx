@@ -104,7 +104,11 @@ export default function ColumnStats({ columnStats }) {
                 {allColumns.map((column) => (
                   <th
                     key={column}
-                    className="text-left px-4 py-3 font-semibold text-gray-700 border-b whitespace-nowrap"
+                    className={`text-left px-4 py-3 font-semibold text-gray-700 border-b whitespace-nowrap ${
+                      column === "column_name"
+                        ? "sticky left-0 z-10 bg-gray-100 border-r border-gray-300"
+                        : ""
+                    }`}
                   >
                     {formatKey(column)}
                   </th>
@@ -117,7 +121,7 @@ export default function ColumnStats({ columnStats }) {
                 return (
                   <tr
                     key={stat.column_name || rowIndex}
-                    className={`${
+                    className={`group ${
                       rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } hover:bg-green-100 transition-colors`}
                   >
@@ -132,7 +136,13 @@ export default function ColumnStats({ columnStats }) {
                             isEnabled
                               ? `text-gray-600 ${highlight}`
                               : "text-gray-300 bg-gray-100"
-                          } whitespace-nowrap`}
+                          } whitespace-nowrap ${
+                            column === "column_name"
+                              ? `sticky left-0 z-10 border-r border-gray-300 ${
+                                  rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                } group-hover:bg-green-100`
+                              : ""
+                          }`}
                           title={
                             !isEnabled
                               ? `Not applicable for ${stat.data_type} type`
