@@ -1,6 +1,6 @@
 """Module test_data_interface contains tests for the data_interface module."""
 
-from typing import Any, Union, Dict
+from typing import Any, Union, Dict, Type
 
 import os
 import shutil
@@ -83,9 +83,8 @@ def test_new_data_file_path(data_file_type: str, want: str):
     assert data_interface.new_data_file_path(data_file_type, TEST_DATA_FILE_DIR) == want
 
 
-# TODO: Add expected failure for json and other data type
 @pytest.mark.parametrize(
-    "data_file_type, path, want",
+    "data_file_type, path, want, expected_exception",
     [
         (
             "csv",
@@ -130,10 +129,32 @@ def test_new_data_file_path(data_file_type: str, want: str):
                     },
                 ],
             },
-        )
+            None,
+        ),
+        (
+            "json",
+            os.path.join(TESTDATA_DIR, "baseline", "3.json"),
+            None,
+            NotImplementedError,
+        ),
+        (
+            "xml",
+            os.path.join(TESTDATA_DIR, "test-csv.csv"),
+            None,
+            KeyError,
+        ),
     ],
-    ids=["test-csv"],
+    ids=["test-csv", "test-json-failure", "test-unknown-type-failure"],
 )
-def test_analyze_data_file(data_file_type: str, path: str, want: Dict[str, Any]):
+def test_analyze_data_file(
+    data_file_type: str,
+    path: str,
+    want: Union[Dict[str, Any], None],
+    expected_exception: Union[Type[Exception], None],
+):
     """Tests analyze data."""
-    assert data_interface.analyze_data_file(data_file_type, path) == want
+    if expected_exception is not None:
+        with pytest.raises(expected_exception):
+            data_interface.analyze_data_file(data_file_type, path)
+    else:
+        assert data_interface.analyze_data_file(data_file_type, path) == want
