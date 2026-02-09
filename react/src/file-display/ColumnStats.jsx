@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function ColumnStats({ columnStats }) {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [hoveredColumn, setHoveredColumn] = useState(null);
 
   if (!columnStats || !Array.isArray(columnStats) || columnStats.length === 0) {
     return null;
@@ -104,11 +105,18 @@ export default function ColumnStats({ columnStats }) {
                 {allColumns.map((column) => (
                   <th
                     key={column}
+                    onMouseEnter={() => setHoveredColumn(column)}
+                    onMouseLeave={() => setHoveredColumn(null)}
                     className={`text-left px-4 py-3 font-semibold text-gray-700 border-b whitespace-nowrap ${
                       column === "column_name"
                         ? "sticky left-0 z-10 bg-gray-100 border-r border-gray-300"
                         : ""
                     }`}
+                    style={
+                      hoveredColumn === column && column !== "column_name"
+                        ? { boxShadow: "inset 0 0 0 9999px rgba(187, 247, 208, 0.5)" }
+                        : undefined
+                    }
                   >
                     {formatKey(column)}
                   </th>
@@ -132,6 +140,8 @@ export default function ColumnStats({ columnStats }) {
                       return (
                         <td
                           key={column}
+                          onMouseEnter={() => setHoveredColumn(column)}
+                          onMouseLeave={() => setHoveredColumn(null)}
                           className={`px-4 py-3 border-b border-gray-200 ${
                             isEnabled
                               ? `text-gray-600 ${highlight}`
@@ -143,6 +153,11 @@ export default function ColumnStats({ columnStats }) {
                                 } group-hover:bg-green-100`
                               : ""
                           }`}
+                          style={
+                            hoveredColumn === column && column !== "column_name"
+                              ? { boxShadow: "inset 0 0 0 9999px rgba(187, 247, 208, 0.5)" }
+                              : undefined
+                          }
                           title={
                             !isEnabled
                               ? `Not applicable for ${stat.data_type} type`
