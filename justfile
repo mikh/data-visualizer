@@ -14,7 +14,7 @@ build-react-image:
     ./infra-scripts/build-react-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/react
 
 helm-install:
-    helm install data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/values.yaml
+    helm install data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/secret-values.yaml
 
 helm-upgrade:
-    helm upgrade data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/values.yaml
+    helm upgrade data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/secret-values.yaml

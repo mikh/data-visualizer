@@ -3,6 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY *.py ./
 COPY db ./db
+COPY data ./data
 COPY requirements.txt ./
 COPY run-container.sh ./
 COPY version ./
