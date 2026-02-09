@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from db import db_interface
 import dir_tree_lib
+from tests.test_lib import dict_compare
 
 TESTDATA_DIR = os.environ.get(
     "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
@@ -493,12 +494,46 @@ def test_copy(
         (
             {"path": "test-folder-1/test-file-1"},
             {
-                "id": 1,
                 "name": "test-file-1",
                 "path": "test-folder-1/test-file-1",
                 "data_file_type": "csv",
                 "data_file_path": "test-file-1.csv",
                 "tags": ["tag-1", "tag-2"],
+                "file_stats": {
+                    "path": "test-folder-1/test-file-1",
+                    "num_columns": 2,
+                    "num_rows": 2,
+                    "column_stats": [
+                        {
+                            "column_name": "column-1",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                        {
+                            "column_name": "column-5",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                    ],
+                },
                 "data": [
                     ["column-1", "column-2"],
                     ["value-1", "value-2"],
@@ -523,7 +558,7 @@ def test_load(request_json: Dict[str, Any], want_response: Dict[str, Any]):
         TEST_DATA_FILE_DIR,
     )
     response = dir_tree_lib.load(engine, request_json, data_file_dir=TEST_DATA_FILE_DIR)
-    assert response == want_response
+    assert dict_compare(response, want_response)
 
 
 @pytest.mark.parametrize(
@@ -583,12 +618,13 @@ def test_upload_success():
         ]
     )
 
-    assert not dir_tree_lib.upload(
-        engine,
-        {"file": FileStorage(filename="test.csv")},
-        {"path": "test-folder-1/test-6"},
-        data_file_dir=TEST_DATA_FILE_DIR,
-    )
+    with open(os.path.join(TESTDATA_DIR, "test-csv.csv"), "rb") as f:
+        assert not dir_tree_lib.upload(
+            engine,
+            {"file": FileStorage(filename="test.csv", stream=f)},
+            {"path": "test-folder-1/test-6"},
+            data_file_dir=TEST_DATA_FILE_DIR,
+        )
 
     new_structure = copy.deepcopy(_BASE_STRUCTURE)
     new_structure["tree"]["test-folder-1"]["children"]["test-6"] = {
@@ -609,39 +645,39 @@ def test_upload_success():
     )
 
 
-_BASELINE_TEST_FILE_1 = {
-    "id": 1,
-    "name": "test-file-1",
-    "path": "test-folder-1/test-file-1",
-    "data_file_type": "csv",
-    "data_file_path": "test-file-1.csv",
-    "tags": ["tag-1", "tag-2"],
+_BASELINE_TEST_FILE_2 = {
+    "name": "test-file-2",
+    "path": "test-file-2",
+    "data_file_type": "json",
+    "data_file_path": "data-folder-1/test-file-2.json",
+    "tags": ["tag-1"],
+    "file_stats": None,
 }
 
 
 @pytest.mark.parametrize(
     "request_json, want_response, want_object_data",
     [
-        ({}, {"error": "Path cannot be empty."}, _BASELINE_TEST_FILE_1),
+        ({}, {"error": "Could not find model object."}, _BASELINE_TEST_FILE_2),
         (
             {"path": "fake-path"},
-            {"error": "File metadata not found for path fake-path."},
-            _BASELINE_TEST_FILE_1,
+            {"error": "Could not find model object."},
+            _BASELINE_TEST_FILE_2,
         ),
         (
             {
-                "path": "test-folder-1/test-file-1",
+                **_BASELINE_TEST_FILE_2,
                 "name": "test-file-1-new",
-                "data_file_type": "json",
-                "data_file_path": "test-file-1.json",
+                "data_file_type": "csv",
+                "data_file_path": "test-file-1.csv",
                 "tags": ["tag-3"],
             },
             {},
             {
-                **_BASELINE_TEST_FILE_1,
+                **_BASELINE_TEST_FILE_2,
                 "name": "test-file-1-new",
-                "data_file_type": "json",
-                "data_file_path": "test-file-1.json",
+                "data_file_type": "csv",
+                "data_file_path": "test-file-1.csv",
                 "tags": ["tag-3"],
             },
         ),
@@ -664,7 +700,7 @@ def test_update(
     with Session(engine) as session:
         assert (
             db_interface.get_db_object_by_key(
-                session, "file_metadata", "path", "test-folder-1/test-file-1"
+                session, "file_metadata", "path", "test-file-2"
             ).to_dict()
             == want_object_data
         )

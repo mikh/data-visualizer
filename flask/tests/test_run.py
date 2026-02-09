@@ -115,7 +115,6 @@ def test_version():
         (
             {"control": "load", "path": "test-folder-1/test-file-1"},
             {
-                "id": 1,
                 "name": "test-file-1",
                 "path": "test-folder-1/test-file-1",
                 "data_file_type": "csv",
@@ -126,6 +125,41 @@ def test_version():
                     ["value-1", "value-2"],
                     ["value-3", "value-4"],
                 ],
+                "file_stats": {
+                    "path": "test-folder-1/test-file-1",
+                    "num_columns": 2,
+                    "num_rows": 2,
+                    "column_stats": [
+                        {
+                            "column_name": "column-1",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                        {
+                            "column_name": "column-5",
+                            "data_type": "string",
+                            "num_rows": 2,
+                            "num_unique_values": 2,
+                            "num_null_values": 0,
+                            "num_zeros_values": 0,
+                            "std_dev": 0.0,
+                            "mean": 0.0,
+                            "median": 0.0,
+                            "min_value": 0.0,
+                            "max_value": 0.0,
+                            "num_empty_values": 0,
+                        },
+                    ],
+                },
             },
         ),
         # Test load control - error case
@@ -146,7 +180,7 @@ def test_version():
         # Test update control - error case
         (
             {"control": "update", "path": ""},
-            {"error": "Path cannot be empty."},
+            {"error": "Could not find model object."},
         ),
         # Test invalid control
         (

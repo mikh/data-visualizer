@@ -74,7 +74,7 @@ def upload_file():
     )
 
 
-def parse_args(args: List[str]) -> argparse.Namespace:
+def parse_args(args: List[str]) -> argparse.Namespace:  # pragma: no cover
     """Parses command line arguments."""
     parser = argparse.ArgumentParser(description="Flask backend")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode.")

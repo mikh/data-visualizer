@@ -1,6 +1,6 @@
 """Module test_data_interface contains tests for the data_interface module."""
 
-from typing import Any, Union
+from typing import Any, Union, Dict, Type
 
 import os
 import shutil
@@ -80,4 +80,81 @@ def test_load_data_file(
 def test_new_data_file_path(data_file_type: str, want: str):
     """Test new_data_file_path function."""
     create_test_data_files(os.path.join(TESTDATA_DIR, "baseline"), TEST_DATA_FILE_DIR)
-    assert data_interface.new_data_file_path(data_file_type, TEST_DATA_FILE_DIR)
+    assert data_interface.new_data_file_path(data_file_type, TEST_DATA_FILE_DIR) == want
+
+
+@pytest.mark.parametrize(
+    "data_file_type, path, want, expected_exception",
+    [
+        (
+            "csv",
+            os.path.join(TESTDATA_DIR, "test-csv.csv"),
+            {
+                "num_columns": 3,
+                "num_rows": 4,
+                "column_stats": [
+                    {
+                        "column_name": "column-1",
+                        "data_type": "numeric",
+                        "num_rows": 4,
+                        "num_unique_values": 4,
+                        "num_null_values": 0,
+                        "num_zeros_values": 1,
+                        "std_dev": 1.707825127659933,
+                        "mean": 1.75,
+                        "median": 1.5,
+                        "min_value": 0.0,
+                        "max_value": 4.0,
+                    },
+                    {
+                        "column_name": "column-2",
+                        "data_type": "string",
+                        "num_rows": 4,
+                        "num_unique_values": 3,
+                        "num_null_values": 1,
+                        "num_empty_values": 0,
+                    },
+                    {
+                        "column_name": "column-3",
+                        "data_type": "numeric",
+                        "num_rows": 4,
+                        "num_unique_values": 2,
+                        "num_null_values": 1,
+                        "num_zeros_values": 0,
+                        "std_dev": 0.5773502691896258,
+                        "mean": 3.3333333333333335,
+                        "median": 3.0,
+                        "min_value": 3.0,
+                        "max_value": 4.0,
+                    },
+                ],
+            },
+            None,
+        ),
+        (
+            "json",
+            os.path.join(TESTDATA_DIR, "baseline", "3.json"),
+            None,
+            NotImplementedError,
+        ),
+        (
+            "xml",
+            os.path.join(TESTDATA_DIR, "test-csv.csv"),
+            None,
+            KeyError,
+        ),
+    ],
+    ids=["test-csv", "test-json-failure", "test-unknown-type-failure"],
+)
+def test_analyze_data_file(
+    data_file_type: str,
+    path: str,
+    want: Union[Dict[str, Any], None],
+    expected_exception: Union[Type[Exception], None],
+):
+    """Tests analyze data."""
+    if expected_exception is not None:
+        with pytest.raises(expected_exception):
+            data_interface.analyze_data_file(data_file_type, path)
+    else:
+        assert data_interface.analyze_data_file(data_file_type, path) == want

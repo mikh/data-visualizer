@@ -2,11 +2,25 @@
 
 from typing import List, Dict, Any, Union
 
-from flask.cli import F
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.orm import Session
 
-from db.models import Base, Tag, FileMetadata
+from db.models import Base, BaseModel, Tag, FileMetadata, FileStats, ColumnStats
+
+
+def _name_to_model(model_name: str) -> Union["BaseModel", None]:
+    """Convert a model name to a model class."""
+    match model_name:
+        case "file_metadata":
+            return FileMetadata
+        case "tag":
+            return Tag
+        case "file_stats":
+            return FileStats
+        case "column_stats":
+            return ColumnStats
+        case _:
+            return None
 
 
 def make_engine(db_path: str) -> Engine:
@@ -16,86 +30,57 @@ def make_engine(db_path: str) -> Engine:
     return engine
 
 
-def get_tag_list(engine: Engine) -> List[str]:
-    """Get a list of all tags in the database."""
+def get_all_of_model(
+    engine: Engine, model_name: str
+) -> Union[None, List[Dict[str, Any]]]:
+    """Get all objects of a given model from the database."""
+    model = _name_to_model(model_name)
+    if model is None:
+        return None
     with Session(engine) as session:
-        tags = session.query(Tag).all()
-        return [tag.name for tag in tags]
-
-
-def get_file_list(engine: Engine) -> List[Dict[str, Any]]:
-    """Get a list of all files in the database."""
-    with Session(engine) as session:
-        files = session.query(FileMetadata).all()
-        return [file.to_dict() for file in files]
+        return [object.to_dict() for object in session.query(model).all()]
 
 
 def get_db_object_by_key(
     session: Session, model_name: str, key: str, value: Any
 ) -> Union[None, FileMetadata, Tag]:
     """Get a database object by key."""
-    model = None
-    match model_name:
-        case "file_metadata":
-            model = FileMetadata
-        case "tag":
-            model = Tag
+    model = _name_to_model(model_name)
     if model is None:
         return None
     return session.query(model).filter(getattr(model, key) == value).first()
 
 
-def create_or_get_file_metadata(
-    session: Session, file_metadata: Dict[str, Any]
-) -> FileMetadata:
-    """Creates FileMetadata object or returns existing one."""
-    file_metadata_path = file_metadata["path"]
-    file_metadata_object = (
-        session.query(FileMetadata)
-        .filter(FileMetadata.path == file_metadata_path)
-        .first()
-    )
-    if file_metadata_object is None:
-        tags = file_metadata.pop("tags")
-        file_metadata_object = FileMetadata(**file_metadata)
-        session.add(file_metadata_object)
-        session.flush()
-        for tag in tags:
-            tag = create_or_get_tag(session, tag)
-            if tag not in file_metadata_object.tags:
-                file_metadata_object.tags.append(tag)
-    return file_metadata_object
-
-
-def create_or_get_tag(session: Session, tag: str) -> Tag:
-    """Creates Tag object or returns existing one."""
-    tag_object = session.query(Tag).filter(Tag.name == tag).first()
-    if tag_object is None:
-        tag_object = Tag(name=tag)
-        session.add(tag_object)
-        session.flush()
-    return tag_object
+def create_or_get_object(
+    session: Session, model_name: str, data: Dict[str, Any]
+) -> Union[None, Any]:
+    """Create or get a database object."""
+    model = _name_to_model(model_name)
+    if model is None:
+        return None
+    return model.create_or_get(session, data)
 
 
 def mass_add_objects(session: Session, objects: Dict[str, List[Dict[str, Any]]]):
     """Adds objects to database."""
     for table_name, table_objects in objects.items():
         for table_object in table_objects:
-            match table_name:
-                case "file_metadata":
-                    create_or_get_file_metadata(session, table_object)
+            create_or_get_object(session, table_name, table_object)
         session.commit()
 
 
-def export_db_objects(session: Session) -> Dict[str, List[Dict[str, Any]]]:
-    """Export database objects to a dictionary."""
-    file_metadata = session.query(FileMetadata).all()
-    file_metadata = [file_metadata.to_dict() for file_metadata in file_metadata]
-    for single_file in file_metadata:
-        del single_file["id"]
-    return {
-        "file_metadata": file_metadata,
-    }
+def export_db_objects(
+    engine: Engine, export_all: bool = False
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Export database objects to a dictionary.
+    Since file_metadata is the top level object, we only use that to export."""
+    objects = {}
+    tables = ["file_metadata"]
+    if export_all:
+        tables = Base.metadata.tables.keys()
+    for table_name in tables:
+        objects[table_name] = get_all_of_model(engine, table_name)
+    return objects
 
 
 def get_object_counts(engine: Engine) -> Dict[str, int]:
@@ -105,3 +90,19 @@ def get_object_counts(engine: Engine) -> Dict[str, int]:
             table.name: session.query(table).count()
             for table in Base.metadata.tables.values()
         }
+
+
+def update_object(engine: Engine, model_name: str, new_data: Dict[str, Any]) -> str:
+    """Update object in db."""
+    with Session(engine) as session:
+        model = _name_to_model(model_name)
+        if not model:
+            return f"Could not find model class with name: '{model_name}'"
+
+        primary_key = model.get_primary_key()
+        model_object = model.find_by_primary_key(session, new_data.get(primary_key))
+        if not model_object:
+            return "Could not find model object."
+        model_object.update_object(session, new_data)
+        session.commit()
+    return ""

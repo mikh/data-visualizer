@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
             omit="$2"
             shift;;
         --min-passing-coverage)
-            min_passing_coverage="$2"
+            min_passing_coverage="$2"print
             shift;;
         *)
             echo "Error: Invalid Option: $1"
@@ -47,6 +47,7 @@ export DB_PATH="untracked/metadata.sqlite"
 export TESTDATA_DIR="tests/testdata"
 export TEST_DATA_FILE_DIR="untracked/tests/data"
 export TEST_DB_JSON_PATH="tests/testdata/baseline-db.json"
+export COMPLETE_EXPORT_DB_JSON_PATH="tests/testdata/complete-export-db.json"
 export VERSION_FILE="version"
 
 coverage run \
