@@ -1,10 +1,9 @@
+import DataTable from "./DataTable";
 import FileStats from "./FileStats";
 import TagDisplay from "./TagDisplay";
 
 export default function FileDisplay({ loadedFile }) {
   console.log("loaded file", loadedFile);
-
-  // TODO: Add Raw display of csv data
 
   return (
     <div
@@ -18,6 +17,9 @@ export default function FileDisplay({ loadedFile }) {
       {loadedFile.file_stats ? (
         <FileStats fileStats={loadedFile.file_stats} />
       ) : null}
+      {Array.isArray(loadedFile.data) && (
+        <DataTable data={loadedFile.data} />
+      )}
     </div>
   );
 }
