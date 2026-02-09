@@ -57,6 +57,19 @@ export default function ColumnStats({ columnStats }) {
 
   const allColumns = getAllColumns();
 
+  const highlightColumns = new Set(["num_null_values", "num_zeros_values", "num_empty_values"]);
+
+  const getCellHighlight = (column, value, stat) => {
+    if (!highlightColumns.has(column) || !value || !stat.num_rows) return "";
+    const pct = value / stat.num_rows;
+    if (pct <= 0) return "";
+    if (pct <= 0.1) return "bg-yellow-100";
+    if (pct <= 0.25) return "bg-yellow-200";
+    if (pct <= 0.5) return "bg-orange-200";
+    if (pct <= 0.75) return "bg-orange-300";
+    return "bg-red-200";
+  };
+
   // Format value for display
   const formatValue = (value) => {
     if (value === null || value === undefined) {
@@ -111,12 +124,13 @@ export default function ColumnStats({ columnStats }) {
                     {allColumns.map((column) => {
                       const isEnabled = enabledColumns.includes(column);
                       const value = stat[column];
+                      const highlight = isEnabled ? getCellHighlight(column, value, stat) : "";
                       return (
                         <td
                           key={column}
                           className={`px-4 py-3 border-b border-gray-200 ${
                             isEnabled
-                              ? "text-gray-600"
+                              ? `text-gray-600 ${highlight}`
                               : "text-gray-300 bg-gray-100"
                           } whitespace-nowrap`}
                           title={
