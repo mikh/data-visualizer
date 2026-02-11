@@ -8,6 +8,8 @@ COPY requirements.txt ./
 COPY run-container.sh ./
 COPY version ./
 
+RUN mkdir -p untracked && mkdir -p untracked/data && mkdir -p untracked/logs
+
 RUN pip install -r requirements.txt
 RUN chmod +x run-container.sh
 
