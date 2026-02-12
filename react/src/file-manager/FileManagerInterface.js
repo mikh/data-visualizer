@@ -1,4 +1,4 @@
-const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
+const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "";
 
 /**
  * Loads the tree and tags from the server.

@@ -10,12 +10,19 @@ import dir_tree_lib
 from db import db_interface
 
 from flask_cors import CORS
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 
 VERSION_FILE = os.environ.get("VERSION_FILE", os.path.join("flask", "version"))
+STATIC_DIR = os.environ.get("STATIC_DIR", os.path.join(os.path.dirname(__file__), "static"))
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="")
 CORS(app)
+
+
+@app.route("/")
+def index():
+    """Serves the React frontend."""
+    return send_from_directory(app.static_folder, "index.html")
 
 
 @app.route("/api/version")

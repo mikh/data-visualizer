@@ -11,7 +11,7 @@ steps:
     commands:
       - pip install -r flask/requirements.txt
       - ./infra-scripts/run-pytests.sh
-  - name: build-flask-image
+  - name: build-image
     image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
     volumes:
       - name: dockersock
@@ -24,21 +24,7 @@ steps:
     commands:
       - sleep 5
       - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
-      - ./infra-scripts/build-flask-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
-  - name: build-react-image
-    image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
-    volumes:
-      - name: dockersock
-        path: /var/run
-    environment:
-      HARBOR_USERNAME:
-        from_secret: HARBOR_USERNAME
-      HARBOR_PASSWORD:
-        from_secret: HARBOR_PASSWORD
-    commands:
-      - sleep 6
-      - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
-      - ./infra-scripts/build-react-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/react
+      - ./infra-scripts/build-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
 
 services:
   - name: docker

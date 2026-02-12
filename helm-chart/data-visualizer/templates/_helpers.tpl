@@ -59,29 +59,12 @@ app.kubernetes.io/component: flask
 {{- end }}
 
 {{/*
-React labels
-*/}}
-{{- define "data-visualizer.react.labels" -}}
-{{- include "data-visualizer.labels" . }}
-app.kubernetes.io/component: react
-{{- end }}
-
-{{/*
 Flask selector labels
 */}}
 {{- define "data-visualizer.flask.selectorLabels" -}}
 {{- include "data-visualizer.selectorLabels" . }}
 app.kubernetes.io/component: flask
 {{- end }}
-
-{{/*
-React selector labels
-*/}}
-{{- define "data-visualizer.react.selectorLabels" -}}
-{{- include "data-visualizer.selectorLabels" . }}
-app.kubernetes.io/component: react
-{{- end }}
-
 
 {{/*
 Create the name of the service account to use

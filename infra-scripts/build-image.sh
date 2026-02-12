@@ -3,8 +3,8 @@
 set -exo pipefail
 
 function help {
-    echo "Build the Flask image"
-    echo "Usage: build-flask-image.sh [options]"
+    echo "Build the combined Flask+React image"
+    echo "Usage: build-image.sh [options]"
     echo "Options:"
     echo "  -h | --help | -help    : Show this help message and exit."
     echo "  --push                 : Push the image to the registry."
@@ -50,9 +50,10 @@ done
 
 git_tag=""
 latest_tag=""
+version=$(cat flask/version)
+react_version=$(cat react/version)
 
 if [ "$push" = true ]; then
-    version=$(cat flask/version)
     if [ "$use_git_tag" = true ]; then
         current_branch=$(git rev-parse --abbrev-ref HEAD)
         current_branch=$(echo $current_branch | tr '/' '-')
@@ -93,10 +94,11 @@ if [ -n "$tag" ]; then
 fi
 
 docker build \
+    --build-arg REACT_VERSION=${react_version} \
     $git_tag_flag \
     $latest_tag_flag \
     $tag_flag \
-    flask
+    .
 
 if [ "$push" = true ]; then
     if [ -n "$git_tag" ]; then

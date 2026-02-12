@@ -5,9 +5,6 @@ image:
   flask:
     image: flask
     tag:
-  react:
-    image: react
-    tag:
 
 imagePullSecrets: []
 nameOverride: ""
