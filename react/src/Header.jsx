@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "http://127.0.0.1:5000";
+const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "";
 const REACT_VERSION = import.meta.env.VITE_REACT_VERSION || "0.0.0";
 
 export default function Header() {

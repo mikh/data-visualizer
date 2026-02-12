@@ -16,13 +16,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "data-visualizer.fullname" $ }}-react
-                port:
-                  number: 80
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
                 name: {{ include "data-visualizer.fullname" $ }}-flask
                 port:
                   number: 80
