@@ -10,7 +10,7 @@ import {
 } from "./FileManagerInterface";
 import DataViewer from "../data-viewer/DataViewer";
 
-export default function FileManager({ setLoadedFile }) {
+export default function FileManager({ loadedFile, setLoadedFile }) {
   const [structure, setStructure] = useState(null);
   const [tags, setTags] = useState([]);
 
@@ -19,8 +19,8 @@ export default function FileManager({ setLoadedFile }) {
   }, []);
 
   return (
-    <div className="flex w-full mt-5 gap-4 px-4">
-      <div className="w-72 flex-shrink-0">
+    <div className="flex flex-col w-full mt-5 gap-4 px-4">
+      <div className="w-full flex justify-center">
         {structure ? (
           <Tree
             treeTitle="Visualization Files"
@@ -38,8 +38,8 @@ export default function FileManager({ setLoadedFile }) {
           />
         ) : null}
       </div>
-      <div className="flex-1 min-w-0">
-        <DataViewer loadedFile={loaded_file} />
+      <div className="w-full">
+        <DataViewer loadedFile={loadedFile} />
       </div>
     </div>
   );

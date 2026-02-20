@@ -10,7 +10,7 @@ export default function App() {
   return (
     <div>
       <Header />
-      <FileManager setLoadedFile={setLoadedFile} />
+      <FileManager loadedFile={loadedFile} setLoadedFile={setLoadedFile} />
       {loadedFile ? <FileDisplay loadedFile={loadedFile} /> : null}
     </div>
   );

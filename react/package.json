@@ -13,7 +13,7 @@
     "file-tree": "file:deps/file-tree-1.0.0.tgz",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "reaviz": "^16.1.1",
+    "reaviz": "^16.1.2",
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
