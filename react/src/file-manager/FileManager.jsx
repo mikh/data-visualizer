@@ -8,9 +8,8 @@ import {
   moveObject,
   uploadFile,
 } from "./FileManagerInterface";
-import DataViewer from "../data-viewer/DataViewer";
 
-export default function FileManager({ loadedFile, setLoadedFile }) {
+export default function FileManager({ setLoadedFile }) {
   const [structure, setStructure] = useState(null);
   const [tags, setTags] = useState([]);
 
@@ -37,9 +36,6 @@ export default function FileManager({ loadedFile, setLoadedFile }) {
             }
           />
         ) : null}
-      </div>
-      <div className="w-full">
-        <DataViewer loadedFile={loadedFile} />
       </div>
     </div>
   );

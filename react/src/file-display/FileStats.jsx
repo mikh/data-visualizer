@@ -24,40 +24,38 @@ export default function FileStats({ fileStats }) {
 
   return (
     <div className="w-full mt-6">
-      <div className="w-full max-w-2xl mx-auto">
+      <div className="w-full max-w-2xl mx-auto border border-slate-200 rounded-lg overflow-hidden">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-t-lg transition-colors"
+          className="w-full flex items-center justify-between bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
         >
-          <h2 className="text-lg font-semibold">File Statistics</h2>
-          <span className="text-xl">{isExpanded ? "−" : "+"}</span>
+          <span>File Statistics</span>
+          <span className="text-slate-400">{isExpanded ? "−" : "+"}</span>
         </button>
 
         {isExpanded && (
-          <div className="border border-gray-300 rounded-b-lg overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700 border-b">
+          <div className="overflow-hidden">
+            <table className="w-full text-sm border-collapse">
+              <thead className="sticky top-0 bg-slate-100">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 border-b border-slate-200">
                     Property
                   </th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700 border-b">
+                  <th className="px-3 py-2 text-left text-xs font-medium text-slate-500 border-b border-slate-200">
                     Value
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {statsToDisplay.map(([key, value], index) => (
+                {statsToDisplay.map(([key, value]) => (
                   <tr
                     key={key}
-                    className={`${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } hover:bg-blue-100 transition-colors cursor-pointer`}
+                    className="hover:bg-slate-50 border-b border-slate-100"
                   >
-                    <td className="px-4 py-3 border-b border-gray-200 font-medium text-gray-700">
+                    <td className="px-3 py-1.5 text-xs font-medium text-slate-600 whitespace-nowrap">
                       {formatKey(key)}
                     </td>
-                    <td className="px-4 py-3 border-b border-gray-200 text-gray-600">
+                    <td className="px-3 py-1.5 text-xs text-slate-700 whitespace-nowrap">
                       {value}
                     </td>
                   </tr>
