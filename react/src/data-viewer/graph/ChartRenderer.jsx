@@ -254,7 +254,13 @@ export default function ChartRenderer({
             yAxis={<LinearYAxis type="category" />}
             series={
               <HeatmapSeries
-                cell={<HeatmapCell onClick={handleHeatmapClick} />}
+                cell={
+                  <HeatmapCell
+                    onClick={handleHeatmapClick}
+                    onMouseEnter={() => {}}
+                    onMouseLeave={() => {}}
+                  />
+                }
               />
             }
           />

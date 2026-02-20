@@ -65,20 +65,30 @@ export function transformForLineChart(rows, headers, xCol, yCols, xType) {
 }
 
 /**
- * Bar chart: ChartShallowDataShape[] with string keys
+ * Bar chart: ChartShallowDataShape[] with string keys, aggregated by sum per unique X value
  */
 export function transformForBarChart(rows, headers, xCol, yCol) {
   const xi = colIndex(headers, xCol);
   const yi = colIndex(headers, yCol);
 
-  return rows
-    .map((row, rowIdx) => {
-      const key = row[xi];
-      const data = parseNumeric(row[yi]);
-      if (key == null || key === "" || data == null) return null;
-      return { key: String(key), data, metadata: { rowIndex: rowIdx } };
-    })
-    .filter(Boolean);
+  const groups = new Map();
+  rows.forEach((row, rowIdx) => {
+    const key = row[xi];
+    const data = parseNumeric(row[yi]);
+    if (key == null || key === "" || data == null) return;
+    const keyStr = String(key);
+    if (!groups.has(keyStr)) {
+      groups.set(keyStr, { sum: 0, firstRowIndex: rowIdx });
+    }
+    const g = groups.get(keyStr);
+    g.sum += data;
+  });
+
+  return Array.from(groups.entries()).map(([key, { sum, firstRowIndex }]) => ({
+    key,
+    data: sum,
+    metadata: { rowIndex: firstRowIndex },
+  }));
 }
 
 /**
@@ -153,15 +163,15 @@ export function transformForHistogram(rows, headers, col, binCount = 20) {
 
 /**
  * Heatmap: ChartNestedDataShape[]
- * Outer key = Y value, inner key = X value, inner data = numeric value
+ * Outer key = Y value, inner key = X value, inner data = sum of numeric values
  */
 export function transformForHeatmap(rows, headers, xCol, yCol, valueCol) {
   const xi = colIndex(headers, xCol);
   const yi = colIndex(headers, yCol);
   const vi = colIndex(headers, valueCol);
 
-  // Group by Y value
-  const grouped = {};
+  // Group by Y, then by X, summing values to avoid duplicate keys
+  const grouped = new Map();
   rows.forEach((row, rowIdx) => {
     const yKey = row[yi];
     const xKey = row[xi];
@@ -169,15 +179,21 @@ export function transformForHeatmap(rows, headers, xCol, yCol, valueCol) {
     if (yKey == null || xKey == null || value == null) return;
 
     const yStr = String(yKey);
-    if (!grouped[yStr]) grouped[yStr] = [];
-    grouped[yStr].push({
-      key: String(xKey),
-      data: value,
-      metadata: { rowIndex: rowIdx },
-    });
+    const xStr = String(xKey);
+    if (!grouped.has(yStr)) grouped.set(yStr, new Map());
+    const xMap = grouped.get(yStr);
+    if (!xMap.has(xStr)) xMap.set(xStr, { sum: 0, firstRowIndex: rowIdx });
+    xMap.get(xStr).sum += value;
   });
 
-  return Object.entries(grouped).map(([key, data]) => ({ key, data }));
+  return Array.from(grouped.entries()).map(([yKey, xMap]) => ({
+    key: yKey,
+    data: Array.from(xMap.entries()).map(([xKey, { sum, firstRowIndex }]) => ({
+      key: xKey,
+      data: sum,
+      metadata: { rowIndex: firstRowIndex },
+    })),
+  }));
 }
 
 /**

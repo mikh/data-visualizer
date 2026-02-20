@@ -7,7 +7,7 @@ const COLUMN_CONFIG = {
     { key: "y", label: "Y Axis", types: ["numeric"], multi: true },
   ],
   bar: [
-    { key: "x", label: "X Axis", types: ["categorical"], multi: false },
+    { key: "x", label: "X Axis", types: ["categorical", "numeric", "date"], multi: false },
     { key: "y", label: "Y Axis", types: ["numeric"], multi: false },
   ],
   scatter: [
@@ -18,8 +18,8 @@ const COLUMN_CONFIG = {
     { key: "column", label: "Column", types: ["numeric"], multi: false },
   ],
   heatmap: [
-    { key: "x", label: "X Axis", types: ["categorical"], multi: false },
-    { key: "y", label: "Y Axis", types: ["categorical"], multi: false },
+    { key: "x", label: "X Axis", types: ["categorical", "numeric", "date"], multi: false },
+    { key: "y", label: "Y Axis", types: ["categorical", "numeric", "date"], multi: false },
     { key: "value", label: "Value", types: ["numeric"], multi: false },
   ],
   area: [
