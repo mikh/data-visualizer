@@ -88,33 +88,33 @@ export default function ColumnStats({ columnStats }) {
   };
 
   return (
-    <div className="w-full max-w-6xl mt-6 mx-auto">
+    <div className="w-full max-w-6xl mt-6 mx-auto border border-slate-200 rounded-lg overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-t-lg transition-colors"
+        className="w-full flex items-center justify-between bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
       >
-        <h2 className="text-lg font-semibold">Column Statistics</h2>
-        <span className="text-xl">{isExpanded ? "−" : "+"}</span>
+        <span>Column Statistics</span>
+        <span className="text-slate-400">{isExpanded ? "−" : "+"}</span>
       </button>
 
       {isExpanded && (
-        <div className="border border-gray-300 rounded-b-lg overflow-x-auto">
-          <table className="w-full min-w-full">
-            <thead>
-              <tr className="bg-gray-100">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse">
+            <thead className="sticky top-0 bg-slate-100">
+              <tr>
                 {allColumns.map((column) => (
                   <th
                     key={column}
                     onMouseEnter={() => setHoveredColumn(column)}
                     onMouseLeave={() => setHoveredColumn(null)}
-                    className={`text-left px-4 py-3 font-semibold text-gray-700 border-b whitespace-nowrap ${
+                    className={`px-3 py-2 text-left text-xs font-medium text-slate-500 border-b border-slate-200 whitespace-nowrap ${
                       column === "column_name"
-                        ? "sticky left-0 z-10 bg-gray-100 border-r border-gray-300"
+                        ? "sticky left-0 z-10 bg-slate-100 border-r border-slate-200"
                         : ""
                     }`}
                     style={
                       hoveredColumn === column && column !== "column_name"
-                        ? { boxShadow: "inset 0 0 0 9999px rgba(187, 247, 208, 0.5)" }
+                        ? { boxShadow: "inset 0 0 0 9999px rgba(226, 232, 240, 0.5)" }
                         : undefined
                     }
                   >
@@ -129,9 +129,7 @@ export default function ColumnStats({ columnStats }) {
                 return (
                   <tr
                     key={stat.column_name || rowIndex}
-                    className={`group ${
-                      rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } hover:bg-green-100 transition-colors`}
+                    className="hover:bg-slate-50 border-b border-slate-100 group"
                   >
                     {allColumns.map((column) => {
                       const isEnabled = enabledColumns.includes(column);
@@ -142,20 +140,18 @@ export default function ColumnStats({ columnStats }) {
                           key={column}
                           onMouseEnter={() => setHoveredColumn(column)}
                           onMouseLeave={() => setHoveredColumn(null)}
-                          className={`px-4 py-3 border-b border-gray-200 ${
+                          className={`px-3 py-1.5 text-xs border-b border-slate-100 ${
                             isEnabled
-                              ? `text-gray-600 ${highlight}`
-                              : "text-gray-300 bg-gray-100"
+                              ? `text-slate-700 ${highlight}`
+                              : "text-slate-300 bg-slate-50"
                           } whitespace-nowrap ${
                             column === "column_name"
-                              ? `sticky left-0 z-10 border-r border-gray-300 ${
-                                  rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                } group-hover:bg-green-100`
+                              ? "sticky left-0 z-10 border-r border-slate-200 bg-white group-hover:bg-slate-50"
                               : ""
                           }`}
                           style={
                             hoveredColumn === column && column !== "column_name"
-                              ? { boxShadow: "inset 0 0 0 9999px rgba(187, 247, 208, 0.5)" }
+                              ? { boxShadow: "inset 0 0 0 9999px rgba(226, 232, 240, 0.5)" }
                               : undefined
                           }
                           title={
