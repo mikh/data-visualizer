@@ -5,9 +5,9 @@ WORKDIR /app
 COPY react/src ./src
 COPY react/index.html ./
 COPY react/package.json ./
+COPY react/.npmrc ./
 COPY react/vite.config.js ./
 COPY react/tailwind.config.js ./
-COPY react/deps ./deps
 COPY react/postcss.config.js ./
 ENV VITE_URL_PREFIX=""
 ENV VITE_REACT_VERSION=${REACT_VERSION}

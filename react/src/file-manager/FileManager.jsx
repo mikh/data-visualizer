@@ -1,4 +1,4 @@
-import Tree from "file-tree";
+import Tree from "@mikh/file-tree";
 import { useEffect, useState } from "react";
 import {
   copyObject,
