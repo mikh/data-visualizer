@@ -21,6 +21,7 @@ steps:
         from_secret: HARBOR_USERNAME
       HARBOR_PASSWORD:
         from_secret: HARBOR_PASSWORD
+      NPM_REGISTRY: http://gitea-http.gitea.svc.cluster.local:3000/api/packages/mikh/npm/
     commands:
       - sleep 5
       - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
