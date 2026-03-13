@@ -94,6 +94,7 @@ if [ -n "$tag" ]; then
 fi
 
 docker build \
+    --network=host \
     --build-arg REACT_VERSION=${react_version} \
     --build-arg NPM_REGISTRY=${NPM_REGISTRY:-https://git.cantrip.com/api/packages/mikh/npm/} \
     $git_tag_flag \
