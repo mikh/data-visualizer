@@ -1,13 +1,14 @@
 # Stage 1: Build React
 FROM node:23-bullseye AS react-build
 ARG REACT_VERSION=0.0.0
+ARG NPM_REGISTRY=https://git.cantrip.com/api/packages/mikh/npm/
 WORKDIR /app
 COPY react/src ./src
 COPY react/index.html ./
 COPY react/package.json ./
+RUN printf "@mikh:registry=%s\nstrict-ssl=false\n" "$NPM_REGISTRY" > .npmrc
 COPY react/vite.config.js ./
 COPY react/tailwind.config.js ./
-COPY react/deps ./deps
 COPY react/postcss.config.js ./
 ENV VITE_URL_PREFIX=""
 ENV VITE_REACT_VERSION=${REACT_VERSION}

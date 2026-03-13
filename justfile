@@ -1,17 +1,30 @@
+[group("run")]
 run-local:
     ./infra-scripts/run-all.sh
 
+[group("run")]
 run-test-mode:
     ./infra-scripts/run-all.sh --test
 
+[group("test")]
 pytests:
     ./infra-scripts/run-pytests.sh
 
+[group("build")]
 build-image:
     ./infra-scripts/build-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
 
+[group("helm")]
 helm-install:
     helm install data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/secret-values.yaml
 
+[group("helm")]
 helm-upgrade:
     helm upgrade data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/secret-values.yaml
+
+# Bump version numbers. Flags (comma-separated): minor-flask, major-flask,
+# minor-react, major-react, minor-helm, major-helm
+# Example: just version-bump minor-flask,minor-react
+[group("version")]
+version-bump flags:
+    python infra-scripts/version-bump.py $(echo "{{flags}}" | tr ',' '\n' | sed 's/^/--/')
