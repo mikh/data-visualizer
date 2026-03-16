@@ -50,7 +50,7 @@ done
 
 git_tag=""
 latest_tag=""
-version=$(cat flask/version)
+version=$(grep '^appVersion:' helm-chart/data-visualizer/Chart.yaml | sed 's/appVersion: *"\(.*\)"/\1/')
 react_version=$(cat react/version)
 
 if [ "$push" = true ]; then
