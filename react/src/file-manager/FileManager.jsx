@@ -34,6 +34,7 @@ export default function FileManager({ setLoadedFile }) {
             uploadFile={(file, path) =>
               uploadFile(file, path, setStructure, setTags)
             }
+            uploadFolder={null}
           />
         ) : null}
       </div>
