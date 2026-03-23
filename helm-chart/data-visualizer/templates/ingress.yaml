@@ -6,8 +6,17 @@ metadata:
     {{- include "data-visualizer.labels" . | nindent 4 }}
   annotations:
     kubernetes.io/ingress.class: nginx
+    {{- if .Values.ingress.tls.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.tls.clusterIssuer | quote }}
+    {{- end }}
 spec:
   ingressClassName: nginx
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: {{ .Values.ingress.tls.secretName | default (printf "%s-tls" (include "data-visualizer.fullname" .)) }}
+  {{- end }}
   rules:
     - host: {{ .Values.ingress.host | quote }}
       http:

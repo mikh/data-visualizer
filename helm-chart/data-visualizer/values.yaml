@@ -12,6 +12,10 @@ fullNameOverride: ""
 
 ingress:
   host:
+  tls:
+    enabled: false
+    clusterIssuer:
+    secretName:
 
 dataVisualizer:
   flask:
