@@ -10,6 +10,7 @@ RUN printf "@mikh:registry=%s\nstrict-ssl=false\n" "$NPM_REGISTRY" > .npmrc
 COPY react/vite.config.js ./
 COPY react/tailwind.config.js ./
 COPY react/postcss.config.js ./
+COPY react/public ./public
 ENV VITE_URL_PREFIX=""
 ENV VITE_REACT_VERSION=${REACT_VERSION}
 RUN npm install && npm run build
