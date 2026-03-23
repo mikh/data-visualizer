@@ -85,14 +85,24 @@ def tree_delete(
 
         data_file_path = file_metadata.data_file_path
         data_file_full_path = os.path.join(data_file_dir, data_file_path)
+        force = request_json.get("force", False)
         if not os.path.exists(data_file_full_path):
-            logger.error(
-                "Data file not found for path %s.",
+            if not force:
+                logger.warning(
+                    "Data file not found for path %s.",
+                    data_file_path,
+                )
+                return {
+                    "error": f"Data file not found for path {data_file_path}.",
+                    "error_type": "file_not_found",
+                }
+            logger.info(
+                "Force deleting metadata for missing data file %s.",
                 data_file_path,
             )
-            return {"error": f"Data file not found for path {data_file_path}."}
-        os.remove(data_file_full_path)
-        logger.info("Deleted data file %s.", data_file_full_path)
+        else:
+            os.remove(data_file_full_path)
+            logger.info("Deleted data file %s.", data_file_full_path)
 
         session.delete(file_metadata)
         session.commit()

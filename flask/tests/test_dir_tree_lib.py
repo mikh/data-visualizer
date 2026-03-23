@@ -162,7 +162,10 @@ def test_list_tree():
         ),
         (
             {"path": "test-folder-1/test-file-3"},
-            {"error": "Data file not found for path fake-file.json."},
+            {
+                "error": "Data file not found for path fake-file.json.",
+                "error_type": "file_not_found",
+            },
             _BASE_STRUCTURE,
             sorted(
                 [
@@ -230,12 +233,75 @@ def test_list_tree():
                 ["0.csv", "test-file-5.csv", "3.json", "data-folder-1/test-file-2.json"]
             ),
         ),
+        (
+            {"path": "test-folder-1/test-file-3", "force": True},
+            {},
+            {
+                "tree": {
+                    "test-folder-1": {
+                        "type": "folder",
+                        "full-path": "test-folder-1",
+                        "children": {
+                            "test-file-1": {
+                                "type": "file",
+                                "full-path": "test-folder-1/test-file-1",
+                                "tags": ["tag-1", "tag-2"],
+                            },
+                        },
+                    },
+                    "test-folder-2": {
+                        "type": "folder",
+                        "full-path": "test-folder-2",
+                        "children": {
+                            "test-file-4": {
+                                "type": "file",
+                                "full-path": "test-folder-2/test-file-4",
+                                "tags": [],
+                            },
+                        },
+                    },
+                    "test-folder-3": {
+                        "type": "folder",
+                        "full-path": "test-folder-3",
+                        "children": {
+                            "test-sub-folder-1": {
+                                "type": "folder",
+                                "full-path": "test-folder-3/test-sub-folder-1",
+                                "children": {
+                                    "test-file-5": {
+                                        "type": "file",
+                                        "full-path": "test-folder-3/test-sub-folder-1/test-file-5",
+                                        "tags": [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    "test-file-2": {
+                        "type": "file",
+                        "full-path": "test-file-2",
+                        "tags": ["tag-1"],
+                    },
+                },
+                "tags": ["tag-1", "tag-2"],
+            },
+            sorted(
+                [
+                    "0.csv",
+                    "test-file-1.csv",
+                    "test-file-5.csv",
+                    "3.json",
+                    "data-folder-1/test-file-2.json",
+                ]
+            ),
+        ),
     ],
     ids=[
         "empty-path-gives-error",
         "bad-path-gives-error",
         "bad-data-file-path-gives-error",
         "delete-file-removes-file-and-metadata",
+        "force-delete-removes-metadata-without-data-file",
     ],
 )
 def test_delete(

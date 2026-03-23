@@ -57,14 +57,38 @@ function performRequest(body, setStructure, setTags) {
  * @param {Function} setTags : The function to set the tags.
  */
 export function deleteObject(path, setStructure, setTags) {
-  performRequest(
-    {
+  fetch(`${URL_PREFIX}/api/tree`, {
+    method: "POST",
+    body: JSON.stringify({
       control: "delete",
       path: path,
+    }),
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
     },
-    setStructure,
-    setTags
-  );
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.error_type === "file_not_found") {
+        const shouldForce = window.confirm(
+          `No data file could be found for "${path}". ` +
+            "Would you like to delete the entry anyway?"
+        );
+        if (shouldForce) {
+          performRequest(
+            { control: "delete", path: path, force: true },
+            setStructure,
+            setTags
+          );
+        }
+        return;
+      }
+      if (data.error) {
+        console.error("Error:", data.error);
+      }
+      loadTree(setStructure, setTags);
+    })
+    .catch((error) => console.error("Error:", error));
 }
 
 /**
