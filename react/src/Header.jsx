@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const URL_PREFIX = import.meta.env.VITE_URL_PREFIX || "";
 const REACT_VERSION = import.meta.env.VITE_REACT_VERSION || "0.0.0";
 
-export default function Header() {
+export default function Header({ showAttributions, setShowAttributions }) {
   const [version, setVersion] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,11 +31,20 @@ export default function Header() {
   return (
     <header className="bg-slate-800 text-white px-8 py-4 flex justify-between items-center shadow">
       <h1 className="m-0 text-2xl font-bold">Data Visualization</h1>
-      <div>
-        <div className="text-sm opacity-80">
-          {loading ? "Loading version..." : error ? error : `Flask v${version}`}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setShowAttributions(!showAttributions)}
+          alt="Attributions"
+          className="text-sm opacity-80 hover:opacity-100 bg-transparent border border-white/30 rounded px-2 py-1 text-white cursor-pointer"
+        >
+          Attributions
+        </button>
+        <div>
+          <div className="text-sm opacity-80">
+            {loading ? "Loading version..." : error ? error : `Flask v${version}`}
+          </div>
+          <div className="text-sm opacity-80">React v{REACT_VERSION}</div>
         </div>
-        <div className="text-sm opacity-80">React v{REACT_VERSION}</div>
       </div>
     </header>
   );
