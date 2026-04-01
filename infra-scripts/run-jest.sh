@@ -34,9 +34,9 @@ mkdir -p "$log_dir"
 cd react
 
 # Ensure the private @mikh registry is configured (needed in CI where .npmrc may not be present)
-npm config set @mikh:registry https://git.cantrip.com/api/packages/mikh/npm/
+npm config set @mikh:registry http://gitea-http.gitea.svc.cluster.local:3000/api/packages/mikh/npm/
 npm config set strict-ssl false
-printf "@mikh:registry=https://git.cantrip.com/api/packages/mikh/npm/\nstrict-ssl=false\n" > .npmrc
+printf "@mikh:registry=http://gitea-http.gitea.svc.cluster.local:3000/api/packages/mikh/npm/\nstrict-ssl=false\n" > .npmrc
 
 npm install
 npm test | tee "../$log_dir/jest.log"
