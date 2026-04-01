@@ -13,6 +13,8 @@ steps:
       - ./infra-scripts/run-pytests.sh
   - name: jest
     image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
+    dns:
+      - 198.168.1.147
     commands:
       - ./infra-scripts/run-jest.sh
   - name: check-version-bump
