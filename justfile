@@ -10,6 +10,10 @@ run-test-mode:
 pytests:
     ./infra-scripts/run-pytests.sh
 
+[group("test")]
+jest:
+    cd react && npm test
+
 [group("build")]
 build-image:
     ./infra-scripts/build-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
