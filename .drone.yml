@@ -11,6 +11,18 @@ steps:
     commands:
       - pip install -r flask/requirements.txt
       - ./infra-scripts/run-pytests.sh
+  - name: jest
+    image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
+    commands:
+      - ./infra-scripts/run-jest.sh
+  - name: check-version-bump
+    image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
+    commands:
+      - ./infra-scripts/check-version-bump.sh
+    when:
+      branch:
+        exclude:
+          - main
   - name: build-image
     image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
     volumes:

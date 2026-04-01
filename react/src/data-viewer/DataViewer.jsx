@@ -10,7 +10,7 @@ export default function DataViewer({ loadedFile }) {
   }
 
   const data = loadedFile.data;
-  if (!data || data.length === 0) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center text-slate-400 text-sm">
         No data found in file

@@ -3,3 +3,4 @@
 **/__pycache__/**
 helm-chart/data-visualizer/secret-values.yaml
 deps/file-tree-1.0.0.tgz
+**/secrets/
