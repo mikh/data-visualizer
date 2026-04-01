@@ -14,6 +14,13 @@ pytests:
 jest:
     cd react && npm test
 
+[group("test")]
+cypress:
+    ./infra-scripts/run-cypress.sh
+
+[group("test")]
+test-all: pytests jest cypress
+
 [group("build")]
 build-image:
     ./infra-scripts/build-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
@@ -29,6 +36,13 @@ helm-upgrade:
 # Bump version numbers. Flags (comma-separated): minor-flask, major-flask,
 # minor-react, major-react, minor-helm, major-helm
 # Example: just version-bump minor-flask,minor-react
+[group("version")]
+version-list:
+    @echo "Flask:        $(cat flask/version)"
+    @echo "React:        $(cat react/version)"
+    @echo "Helm chart:   $(grep '^version:' helm-chart/data-visualizer/Chart.yaml | awk '{print $2}')"
+    @echo "Helm app:     $(grep '^appVersion:' helm-chart/data-visualizer/Chart.yaml | awk '{print $2}' | tr -d '\"')"
+
 [group("version")]
 version-bump flags:
     python infra-scripts/version-bump.py $(echo "{{flags}}" | tr ',' '\n' | sed 's/^/--/')
