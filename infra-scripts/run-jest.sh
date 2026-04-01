@@ -32,5 +32,10 @@ done
 
 mkdir -p "$log_dir"
 cd react
+
+# Ensure the private @mikh registry is configured (needed in CI where .npmrc may not be present)
+npm config set @mikh:registry https://git.cantrip.com/api/packages/mikh/npm/
+npm config set strict-ssl false
+
 npm install
 npm test | tee "../$log_dir/jest.log"
