@@ -24,6 +24,9 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+# Drone only clones the target branch; fetch main so we can compare against it
+git fetch origin main:refs/remotes/origin/main 2>/dev/null || true
+
 version_files=(
     "flask/version"
     "react/version"
