@@ -36,6 +36,9 @@ cd react
 # Ensure the private @mikh registry is configured (needed in CI where .npmrc may not be present)
 npm config set @mikh:registry https://git.cantrip.com/api/packages/mikh/npm/
 npm config set strict-ssl false
+printf "@mikh:registry=https://git.cantrip.com/api/packages/mikh/npm/\nstrict-ssl=false\n" > .npmrc
 
 npm install
 npm test | tee "../$log_dir/jest.log"
+
+rm -f .npmrc
