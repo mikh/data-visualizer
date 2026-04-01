@@ -1,0 +1,11 @@
+FROM node:23-bullseye
+ARG NPM_REGISTRY=https://git.cantrip.com/api/packages/mikh/npm/
+WORKDIR /app
+COPY react/package.json ./
+COPY react/package-lock.json ./
+RUN printf "@mikh:registry=%s\nstrict-ssl=false\n" "$NPM_REGISTRY" > .npmrc
+RUN npm install
+COPY react/src ./src
+COPY react/jest.config.cjs ./
+COPY react/babel.config.cjs ./
+RUN npm test

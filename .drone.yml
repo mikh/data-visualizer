@@ -12,9 +12,13 @@ steps:
       - pip install -r flask/requirements.txt
       - ./infra-scripts/run-pytests.sh
   - name: jest
-    image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
+    image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
+    volumes:
+      - name: dockersock
+        path: /var/run
     commands:
-      - ./infra-scripts/run-jest.sh
+      - sleep 5
+      - docker build -f infra-scripts/Dockerfile.jest -t data-visualizer-jest . --progress=plain
   - name: check-version-bump
     image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
     commands:
