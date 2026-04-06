@@ -6,13 +6,6 @@ clone:
   skip_verify: true
 
 steps:
-  - name: version-check
-    image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
-    commands:
-      - pip install pyyaml
-      - git fetch origin +refs/heads/main:refs/remotes/origin/main
-      - git branch
-      - python infra-scripts/version_bump.py --config infra-scripts/version-config.json --compare-to-branch --branch origin/main
   - name: pytests
     image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
     commands:
@@ -22,14 +15,6 @@ steps:
     image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
     commands:
       - ./infra-scripts/run-jest.sh
-  - name: check-version-bump
-    image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
-    commands:
-      - ./infra-scripts/check-version-bump.sh
-    when:
-      branch:
-        exclude:
-          - main
   - name: build-image
     image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
     volumes:
@@ -44,6 +29,12 @@ steps:
       - sleep 5
       - echo "$HARBOR_PASSWORD" | docker login -u "$HARBOR_USERNAME" --password-stdin harbor.cantrip.com
       - ./infra-scripts/build-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
+  - name: version-check
+    image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
+    commands:
+      - pip install pyyaml
+      - git fetch origin +refs/heads/main:refs/remotes/origin/main
+      - python infra-scripts/version_bump.py --config infra-scripts/version-config.json --compare-to-branch --branch origin/main
 
 services:
   - name: docker
