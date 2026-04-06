@@ -42,6 +42,7 @@ steps:
     commands:
       - pip install pyyaml
       - git fetch origin +refs/heads/main:refs/remotes/origin/main
+      - git branch
       - python infra-scripts/version_bump.py --config infra-scripts/version-config.json --compare-to-branch --branch origin/main
 
 services:
