@@ -378,6 +378,7 @@ def read_version_from_ref(
     Returns None if the file doesn't exist on that ref.
     """
     rel_path = target.path.relative_to(repo_root)
+    print(f"Reading version from {ref}:{rel_path}")
     result = _git("show", f"{ref}:{rel_path}", cwd=repo_root)
     if result.returncode != 0:
         return None
@@ -443,8 +444,7 @@ def compare_to_branch(targets: dict[str, Target], branch: str) -> None:
         print(f"\nVersion check passed: {', '.join(incremented)} incremented.")
     else:
         print(
-            "\nERROR: No versions were incremented compared to "
-            f"branch '{branch}'.",
+            "\nERROR: No versions were incremented compared to " f"branch '{branch}'.",
             file=sys.stderr,
         )
         sys.exit(1)
