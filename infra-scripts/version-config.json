@@ -1,0 +1,19 @@
+{
+  "flask": {
+    "path": "../flask/version",
+    "type": "version"
+  },
+  "react": {
+    "path": "../react/version",
+    "type": "version"
+  },
+  "helm-appversion": {
+    "path": "../helm-chart/data-visualizer/Chart.yaml",
+    "type": "helm-appversion",
+    "depends-on": ["flask", "react"]
+  },
+  "helm-chart": {
+    "path": "../helm-chart/data-visualizer/Chart.yaml",
+    "type": "helm-version"
+  }
+}

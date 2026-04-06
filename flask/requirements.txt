@@ -4,3 +4,4 @@ sqlalchemy
 pytest
 coverage
 pandas
+pyyaml

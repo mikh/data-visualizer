@@ -33,8 +33,12 @@ helm-install:
 helm-upgrade:
     helm upgrade data-visualizer helm-chart/data-visualizer -n data-visualizer -f helm-chart/data-visualizer/secret-values.yaml
 
-# Bump version numbers. Flags (comma-separated): minor-flask, major-flask,
-# minor-react, major-react, minor-helm, major-helm
+[group("version")]
+version-list:
+    python infra-scripts/version_bump.py \
+        --config infra-scripts/version-config.json \
+        --list
+
 # Example: just version-bump minor-flask,minor-react
 [group("version")]
 version-list:
@@ -45,4 +49,5 @@ version-list:
 
 [group("version")]
 version-bump flags:
-    python infra-scripts/version-bump.py $(echo "{{flags}}" | tr ',' '\n' | sed 's/^/--/')
+    python infra-scripts/version_bump.py \
+        --config infra-scripts/version-config.json
