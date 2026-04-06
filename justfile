@@ -39,14 +39,6 @@ version-list:
         --config infra-scripts/version-config.json \
         --list
 
-# Example: just version-bump minor-flask,minor-react
-[group("version")]
-version-list:
-    @echo "Flask:        $(cat flask/version)"
-    @echo "React:        $(cat react/version)"
-    @echo "Helm chart:   $(grep '^version:' helm-chart/data-visualizer/Chart.yaml | awk '{print $2}')"
-    @echo "Helm app:     $(grep '^appVersion:' helm-chart/data-visualizer/Chart.yaml | awk '{print $2}' | tr -d '\"')"
-
 [group("version")]
 version-bump flags:
     python infra-scripts/version_bump.py \
