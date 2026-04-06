@@ -50,4 +50,5 @@ version-list:
 [group("version")]
 version-bump flags:
     python infra-scripts/version_bump.py \
-        --config infra-scripts/version-config.json
+        --config infra-scripts/version-config.json \
+        --bump "{{flags}}"
