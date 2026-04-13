@@ -59,7 +59,7 @@ cd ../react
 # Start Vite dev server in background
 export VITE_URL_PREFIX=http://127.0.0.1:5000
 export VITE_REACT_VERSION=$(cat version)
-npx vite --port 5173 &
+npx vite --port 5173 --host 127.0.0.1 &
 vite_pid=$!
 
 # Wait for both servers to be ready
