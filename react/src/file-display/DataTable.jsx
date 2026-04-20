@@ -34,9 +34,7 @@ export default function DataTable({ data }) {
                     <th
                       key={i}
                       className={`px-3 py-2 text-left text-xs font-medium text-slate-500 border-b border-slate-200 whitespace-nowrap ${
-                        i === 0
-                          ? "sticky left-0 z-10 bg-slate-100 border-r border-slate-200"
-                          : ""
+                        i === 0 ? "sticky left-0 z-10 bg-slate-100 border-r border-slate-200" : ""
                       }`}
                     >
                       {header}
@@ -46,10 +44,7 @@ export default function DataTable({ data }) {
               </thead>
               <tbody>
                 {rows.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    className="hover:bg-slate-50 border-b border-slate-100 group"
-                  >
+                  <tr key={rowIndex} className="hover:bg-slate-50 border-b border-slate-100 group">
                     {headers.map((_, colIndex) => (
                       <td
                         key={colIndex}

@@ -11,7 +11,11 @@ describe("Debug tree", () => {
     cy.get("body").then(($body) => {
       cy.task("log", "tree-folder count: " + $body.find("[data-cy='tree-folder']").length);
       cy.task("log", "tree-file count: " + $body.find("[data-cy='tree-file']").length);
-      cy.task("log", "tree-body HTML: " + ($body.find("[data-cy='tree-body']").html() || "NOT FOUND").substring(0, 1000));
+      cy.task(
+        "log",
+        "tree-body HTML: " +
+          ($body.find("[data-cy='tree-body']").html() || "NOT FOUND").substring(0, 1000)
+      );
     });
   });
 });

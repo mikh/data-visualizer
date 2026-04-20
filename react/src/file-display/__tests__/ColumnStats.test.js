@@ -91,11 +91,7 @@ describe("getColumnsForDataType", () => {
 
 // ─── getCellHighlight ───────────────────────────────────────────────────────
 
-const highlightColumns = new Set([
-  "num_null_values",
-  "num_zeros_values",
-  "num_empty_values",
-]);
+const highlightColumns = new Set(["num_null_values", "num_zeros_values", "num_empty_values"]);
 
 function getCellHighlight(column, value, stat) {
   if (!highlightColumns.has(column) || !value || !stat.num_rows) return "";

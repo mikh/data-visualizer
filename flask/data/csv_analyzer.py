@@ -1,11 +1,11 @@
 """Module csv_analyzer analyzes the stats of a csv file."""
 
-from typing import Dict, Any
+from typing import Any
 
 import pandas as pd
 
 
-def analyze_csv_stats(file_path: str) -> Dict[str, Any]:
+def analyze_csv_stats(file_path: str) -> dict[str, Any]:
     """Analyze a csv file for its stats."""
     df = pd.read_csv(file_path)
 
@@ -13,10 +13,7 @@ def analyze_csv_stats(file_path: str) -> Dict[str, Any]:
     for col in df.columns:
         col_data = df[col]
 
-        if pd.api.types.is_numeric_dtype(col_data):
-            data_type = "numeric"
-        else:
-            data_type = "string"
+        data_type = "numeric" if pd.api.types.is_numeric_dtype(col_data) else "string"
 
         num_rows = len(col_data)
         num_null = col_data.isnull().sum()

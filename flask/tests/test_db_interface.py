@@ -1,16 +1,15 @@
 """Module test_db_interface contains tests for the db_interface module."""
 
-from typing import Any, Dict, List
-
-import os
-import json
 import copy
+import json
+import os
+from typing import Any
 
 import pytest
+from db import db_interface
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
-from db import db_interface
 from tests.test_lib import dict_compare
 
 TEST_DB_JSON_PATH = os.environ.get(
@@ -22,9 +21,9 @@ COMPLETE_EXPORT_DB_JSON_PATH = os.environ.get(
 )
 
 
-def load_test_db_data() -> Dict[str, Any]:
+def load_test_db_data() -> dict[str, Any]:
     """Load test database data."""
-    with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
+    with open(TEST_DB_JSON_PATH, encoding="utf-8") as file:
         return json.load(file)
 
 
@@ -184,7 +183,7 @@ def make_test_db(empty: bool = False) -> Engine:
         ),
     ],
 )
-def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
+def test_get_all_of_model(model_name: str, want: list[dict[str, Any]]):
     """Test get_all_of_model function."""
     engine = make_test_db()
     output_objects = db_interface.get_all_of_model(engine, model_name)
@@ -305,15 +304,11 @@ def test_get_all_of_model(model_name: str, want: List[Dict[str, Any]]):
     ],
     ids=["file_metadata", "tag", "file_stats", "column_stats", "fake-model"],
 )
-def test_get_db_object_by_key(
-    model_name: str, key: str, value: Any, want_dict: Dict[str, Any]
-):
+def test_get_db_object_by_key(model_name: str, key: str, value: Any, want_dict: dict[str, Any]):
     """Test get_db_object_by_key function."""
     engine = make_test_db()
     with Session(engine) as session:
-        output_db_object = db_interface.get_db_object_by_key(
-            session, model_name, key, value
-        )
+        output_db_object = db_interface.get_db_object_by_key(session, model_name, key, value)
         if output_db_object is not None:
             output_db_object = output_db_object.to_dict()
         assert output_db_object == want_dict
@@ -403,9 +398,7 @@ NEW_FILE_METADATA = {
         "new-file-metadata",
     ],
 )
-def test_create_or_get_object(
-    model_name: str, data: Dict[str, Any], want: Dict[str, Any]
-):
+def test_create_or_get_object(model_name: str, data: dict[str, Any], want: dict[str, Any]):
     """Test the create_or_get_object function."""
     data = copy.deepcopy(data)
 
@@ -429,7 +422,7 @@ def test_mass_add_objects():
         "column_stats": 0,
     }
 
-    with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
+    with open(TEST_DB_JSON_PATH, encoding="utf-8") as file:
         test_db_json = json.load(file)
 
     with Session(engine) as session:
@@ -469,7 +462,7 @@ def test_export_db_objects(export_all: bool, want_path: str):
     """Tests the export_db_objects function."""
     engine = make_test_db()
     output_db_objects = db_interface.export_db_objects(engine, export_all=export_all)
-    with open(want_path, "r", encoding="utf-8") as file:
+    with open(want_path, encoding="utf-8") as file:
         want_db_objects = json.load(file)
     assert dict_compare(output_db_objects, want_db_objects)
 
@@ -803,10 +796,10 @@ def test_export_db_objects(export_all: bool, want_path: str):
 )
 def test_update_object(
     model_name: str,
-    new_data: Dict[str, Any],
+    new_data: dict[str, Any],
     want_output: str,
-    want_data: Dict[str, Any],
-    want_object_counts: Dict[str, int],
+    want_data: dict[str, Any],
+    want_object_counts: dict[str, int],
 ):
     """Tests the update_object function."""
     engine = make_test_db()
@@ -816,15 +809,11 @@ def test_update_object(
     assert db_interface.update_object(engine, model_name, new_data) == want_output
     if not want_output:
         with Session(engine) as session:
-            model_class = (
-                db_interface._name_to_model(  # pylint: disable=protected-access
-                    model_name
-                )
+            model_class = db_interface._name_to_model(  # pylint: disable=protected-access
+                model_name
             )
             primary_key = model_class.get_primary_key()
-            model_object = model_class.find_by_primary_key(
-                session, new_data.get(primary_key)
-            )
+            model_object = model_class.find_by_primary_key(session, new_data.get(primary_key))
             assert dict_compare(model_object.to_dict(), want_data)
 
     assert dict_compare(

@@ -1,11 +1,11 @@
 """Module db_interface contains functions to interface with metadata database."""
 
-from typing import List, Dict, Any, Union
+from typing import Any, Union
 
-from sqlalchemy import create_engine, Engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
-from db.models import Base, BaseModel, Tag, FileMetadata, FileStats, ColumnStats
+from db.models import Base, BaseModel, ColumnStats, FileMetadata, FileStats, Tag
 
 
 def _name_to_model(model_name: str) -> Union["BaseModel", None]:
@@ -30,9 +30,7 @@ def make_engine(db_path: str) -> Engine:
     return engine
 
 
-def get_all_of_model(
-    engine: Engine, model_name: str
-) -> Union[None, List[Dict[str, Any]]]:
+def get_all_of_model(engine: Engine, model_name: str) -> None | list[dict[str, Any]]:
     """Get all objects of a given model from the database."""
     model = _name_to_model(model_name)
     if model is None:
@@ -43,7 +41,7 @@ def get_all_of_model(
 
 def get_db_object_by_key(
     session: Session, model_name: str, key: str, value: Any
-) -> Union[None, FileMetadata, Tag]:
+) -> None | FileMetadata | Tag:
     """Get a database object by key."""
     model = _name_to_model(model_name)
     if model is None:
@@ -51,9 +49,7 @@ def get_db_object_by_key(
     return session.query(model).filter(getattr(model, key) == value).first()
 
 
-def create_or_get_object(
-    session: Session, model_name: str, data: Dict[str, Any]
-) -> Union[None, Any]:
+def create_or_get_object(session: Session, model_name: str, data: dict[str, Any]) -> None | Any:
     """Create or get a database object."""
     model = _name_to_model(model_name)
     if model is None:
@@ -61,7 +57,7 @@ def create_or_get_object(
     return model.create_or_get(session, data)
 
 
-def mass_add_objects(session: Session, objects: Dict[str, List[Dict[str, Any]]]):
+def mass_add_objects(session: Session, objects: dict[str, list[dict[str, Any]]]):
     """Adds objects to database."""
     for table_name, table_objects in objects.items():
         for table_object in table_objects:
@@ -69,9 +65,7 @@ def mass_add_objects(session: Session, objects: Dict[str, List[Dict[str, Any]]])
         session.commit()
 
 
-def export_db_objects(
-    engine: Engine, export_all: bool = False
-) -> Dict[str, List[Dict[str, Any]]]:
+def export_db_objects(engine: Engine, export_all: bool = False) -> dict[str, list[dict[str, Any]]]:
     """Export database objects to a dictionary.
     Since file_metadata is the top level object, we only use that to export."""
     objects = {}
@@ -83,16 +77,13 @@ def export_db_objects(
     return objects
 
 
-def get_object_counts(engine: Engine) -> Dict[str, int]:
+def get_object_counts(engine: Engine) -> dict[str, int]:
     """Get the object counts for all tables in the database."""
     with Session(engine) as session:
-        return {
-            table.name: session.query(table).count()
-            for table in Base.metadata.tables.values()
-        }
+        return {table.name: session.query(table).count() for table in Base.metadata.tables.values()}
 
 
-def update_object(engine: Engine, model_name: str, new_data: Dict[str, Any]) -> str:
+def update_object(engine: Engine, model_name: str, new_data: dict[str, Any]) -> str:
     """Update object in db."""
     with Session(engine) as session:
         model = _name_to_model(model_name)

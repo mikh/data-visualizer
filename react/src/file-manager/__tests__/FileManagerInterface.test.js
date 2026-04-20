@@ -109,9 +109,7 @@ describe("deleteObject", () => {
     deleteObject("/missing", jest.fn(), jest.fn());
     await flushPromises();
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringContaining("/missing")
-    );
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("/missing"));
   });
 
   it("sends force delete when user confirms", async () => {
@@ -150,10 +148,7 @@ describe("deleteObject", () => {
     deleteObject("/file", jest.fn(), jest.fn());
     await flushPromises();
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Error:",
-      "something went wrong"
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith("Error:", "something went wrong");
   });
 });
 

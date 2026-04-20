@@ -1,24 +1,21 @@
 """Module test_dir_tree_lib contains tests for the dir_tree_lib module."""
 
-from typing import Dict, Any, List
-
-import os
-import json
-import shutil
 import copy
+import json
+import os
+import shutil
+from typing import Any
 
+import dir_tree_lib
 import pytest
-from werkzeug.datastructures import FileStorage
+from db import db_interface
 from sqlalchemy import Engine
 from sqlalchemy.orm import Session
+from werkzeug.datastructures import FileStorage
 
-from db import db_interface
-import dir_tree_lib
 from tests.test_lib import dict_compare
 
-TESTDATA_DIR = os.environ.get(
-    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
-)
+TESTDATA_DIR = os.environ.get("TESTDATA_DIR", os.path.join("flask", "tests", "testdata"))
 TEST_DB_JSON_PATH = os.environ.get(
     "TEST_DB_JSON_PATH", os.path.join(TESTDATA_DIR, "baseline-db.json")
 )
@@ -88,7 +85,7 @@ def make_test_db(empty: bool = False) -> Engine:
 
     if not empty:
         with Session(engine) as session:
-            with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
+            with open(TEST_DB_JSON_PATH, encoding="utf-8") as file:
                 test_db_json = json.load(file)
             db_interface.mass_add_objects(session, test_db_json)
     return engine
@@ -108,7 +105,7 @@ def create_test_data_files(testdata_files_dir: str, data_file_dir: str):
             shutil.copy(src, dst)
 
 
-def get_all_files(base_dir: str) -> List[str]:
+def get_all_files(base_dir: str) -> list[str]:
     """Get the list of all files in dir structure."""
     all_files = []
     for root, _, files in os.walk(base_dir):
@@ -229,9 +226,7 @@ def test_list_tree():
                 },
                 "tags": ["tag-1", "tag-2"],
             },
-            sorted(
-                ["0.csv", "test-file-5.csv", "3.json", "data-folder-1/test-file-2.json"]
-            ),
+            sorted(["0.csv", "test-file-5.csv", "3.json", "data-folder-1/test-file-2.json"]),
         ),
         (
             {"path": "test-folder-1/test-file-3", "force": True},
@@ -305,10 +300,10 @@ def test_list_tree():
     ],
 )
 def test_delete(
-    request_json: Dict[str, Any],
-    want_response: Dict[str, str],
-    want_structure: Dict[str, Any],
-    want_data_files: List[str],
+    request_json: dict[str, Any],
+    want_response: dict[str, str],
+    want_structure: dict[str, Any],
+    want_data_files: list[str],
 ):
     """Test the delete function."""
     engine = make_test_db()
@@ -316,9 +311,7 @@ def test_delete(
         os.path.join(TESTDATA_DIR, "baseline"),
         TEST_DATA_FILE_DIR,
     )
-    response = dir_tree_lib.tree_delete(
-        engine, request_json, data_file_dir=TEST_DATA_FILE_DIR
-    )
+    response = dir_tree_lib.tree_delete(engine, request_json, data_file_dir=TEST_DATA_FILE_DIR)
     assert response == want_response
     assert dir_tree_lib.list_tree(engine) == want_structure
     assert sorted(get_all_files(TEST_DATA_FILE_DIR)) == want_data_files
@@ -343,9 +336,7 @@ def test_delete(
                 "source": "test-folder-1/test-file-1",
                 "dest": "test-folder-1/test-file-1",
             },
-            {
-                "error": "Dest file metadata already exists for path test-folder-1/test-file-1."
-            },
+            {"error": "Dest file metadata already exists for path test-folder-1/test-file-1."},
             _BASE_STRUCTURE,
         ),
         (
@@ -419,9 +410,9 @@ def test_delete(
     ],
 )
 def test_move(
-    request_json: Dict[str, Any],
-    want_response: Dict[str, str],
-    want_structure: Dict[str, Any],
+    request_json: dict[str, Any],
+    want_response: dict[str, str],
+    want_structure: dict[str, Any],
 ):
     """Test the move function."""
     engine = make_test_db()
@@ -449,9 +440,7 @@ def test_move(
                 "source": "test-folder-1/test-file-1",
                 "dest": "test-folder-1/test-file-1",
             },
-            {
-                "error": "Dest file metadata already exists for path test-folder-1/test-file-1."
-            },
+            {"error": "Dest file metadata already exists for path test-folder-1/test-file-1."},
             _BASE_STRUCTURE,
         ),
         (
@@ -530,9 +519,9 @@ def test_move(
     ],
 )
 def test_copy(
-    request_json: Dict[str, Any],
-    want_response: Dict[str, str],
-    want_structure: Dict[str, Any],
+    request_json: dict[str, Any],
+    want_response: dict[str, str],
+    want_structure: dict[str, Any],
 ):
     """Test the move function."""
     engine = make_test_db()
@@ -616,7 +605,7 @@ def test_copy(
         "load-file",
     ],
 )
-def test_load(request_json: Dict[str, Any], want_response: Dict[str, Any]):
+def test_load(request_json: dict[str, Any], want_response: dict[str, Any]):
     """Test the load function."""
     engine = make_test_db()
     create_test_data_files(
@@ -657,7 +646,7 @@ def test_load(request_json: Dict[str, Any], want_response: Dict[str, Any]):
     ],
 )
 def test_upload_errors(
-    request_files: Dict[str, Any], request_form: Dict[str, Any], want: Dict[str, str]
+    request_files: dict[str, Any], request_form: dict[str, Any], want: dict[str, str]
 ):
     """Test upload errors."""
     engine = make_test_db()
@@ -755,9 +744,9 @@ _BASELINE_TEST_FILE_2 = {
     ],
 )
 def test_update(
-    request_json: Dict[str, Any],
-    want_response: Dict[str, str],
-    want_object_data: Dict[str, Any],
+    request_json: dict[str, Any],
+    want_response: dict[str, str],
+    want_object_data: dict[str, Any],
 ):
     """Tests the update function."""
     engine = make_test_db()

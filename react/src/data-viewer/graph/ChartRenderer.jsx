@@ -33,11 +33,7 @@ function hasRequiredColumns(graphType, selectedColumns) {
   switch (graphType) {
     case "line":
     case "area":
-      return (
-        selectedColumns.x &&
-        selectedColumns.y &&
-        selectedColumns.y.length > 0
-      );
+      return selectedColumns.x && selectedColumns.y && selectedColumns.y.length > 0;
     case "bar":
       return selectedColumns.x && selectedColumns.y;
     case "scatter":
@@ -51,44 +47,19 @@ function hasRequiredColumns(graphType, selectedColumns) {
   }
 }
 
-export default function ChartRenderer({
-  graphType,
-  selectedColumns,
-  rows,
-  headers,
-  onRowSelect,
-}) {
+export default function ChartRenderer({ graphType, selectedColumns, rows, headers, onRowSelect }) {
   const chartData = useMemo(() => {
     if (!hasRequiredColumns(graphType, selectedColumns)) return null;
 
     switch (graphType) {
       case "line": {
-        const xType = inferColumnType(
-          rows,
-          headers.indexOf(selectedColumns.x)
-        );
-        return transformForLineChart(
-          rows,
-          headers,
-          selectedColumns.x,
-          selectedColumns.y,
-          xType
-        );
+        const xType = inferColumnType(rows, headers.indexOf(selectedColumns.x));
+        return transformForLineChart(rows, headers, selectedColumns.x, selectedColumns.y, xType);
       }
       case "bar":
-        return transformForBarChart(
-          rows,
-          headers,
-          selectedColumns.x,
-          selectedColumns.y
-        );
+        return transformForBarChart(rows, headers, selectedColumns.x, selectedColumns.y);
       case "scatter":
-        return transformForScatterPlot(
-          rows,
-          headers,
-          selectedColumns.x,
-          selectedColumns.y
-        );
+        return transformForScatterPlot(rows, headers, selectedColumns.x, selectedColumns.y);
       case "histogram":
         return transformForHistogram(rows, headers, selectedColumns.column);
       case "heatmap":
@@ -100,17 +71,8 @@ export default function ChartRenderer({
           selectedColumns.value
         );
       case "area": {
-        const xType = inferColumnType(
-          rows,
-          headers.indexOf(selectedColumns.x)
-        );
-        return transformForAreaChart(
-          rows,
-          headers,
-          selectedColumns.x,
-          selectedColumns.y,
-          xType
-        );
+        const xType = inferColumnType(rows, headers.indexOf(selectedColumns.x));
+        return transformForAreaChart(rows, headers, selectedColumns.x, selectedColumns.y, xType);
       }
       default:
         return null;
@@ -143,8 +105,7 @@ export default function ChartRenderer({
   };
 
   const handleHeatmapClick = (event) => {
-    const rowIndex =
-      event?.value?.metadata?.rowIndex ?? event?.metadata?.rowIndex;
+    const rowIndex = event?.value?.metadata?.rowIndex ?? event?.metadata?.rowIndex;
     if (rowIndex != null) onRowSelect(rowIndex);
   };
 
@@ -170,10 +131,7 @@ export default function ChartRenderer({
             series={
               <LineSeries
                 symbols={
-                  <PointSeries
-                    show="hover"
-                    point={<ScatterPoint onClick={handlePointClick} />}
-                  />
+                  <PointSeries show="hover" point={<ScatterPoint onClick={handlePointClick} />} />
                 }
               />
             }
@@ -191,9 +149,7 @@ export default function ChartRenderer({
               <LinearXAxis
                 type="category"
                 tickSeries={
-                  <LinearXAxisTickSeries
-                    label={<LinearXAxisTickLabel rotation={-45} />}
-                  />
+                  <LinearXAxisTickSeries label={<LinearXAxisTickLabel rotation={-45} />} />
                 }
               />
             }
@@ -211,11 +167,7 @@ export default function ChartRenderer({
             data={chartData}
             xAxis={<LinearXAxis type="value" />}
             yAxis={<LinearYAxis type="value" />}
-            series={
-              <ScatterSeries
-                point={<ScatterPoint onClick={handlePointClick} />}
-              />
-            }
+            series={<ScatterSeries point={<ScatterPoint onClick={handlePointClick} />} />}
           />
         </div>
       );
@@ -230,16 +182,12 @@ export default function ChartRenderer({
               <LinearXAxis
                 type="category"
                 tickSeries={
-                  <LinearXAxisTickSeries
-                    label={<LinearXAxisTickLabel rotation={-45} />}
-                  />
+                  <LinearXAxisTickSeries label={<LinearXAxisTickLabel rotation={-45} />} />
                 }
               />
             }
             yAxis={<LinearYAxis type="value" />}
-            series={
-              <BarSeries bar={<Bar onClick={handleHistogramBarClick} />} />
-            }
+            series={<BarSeries bar={<Bar onClick={handleHistogramBarClick} />} />}
           />
         </div>
       );
@@ -278,10 +226,7 @@ export default function ChartRenderer({
             series={
               <AreaSeries
                 symbols={
-                  <PointSeries
-                    show="hover"
-                    point={<ScatterPoint onClick={handlePointClick} />}
-                  />
+                  <PointSeries show="hover" point={<ScatterPoint onClick={handlePointClick} />} />
                 }
               />
             }

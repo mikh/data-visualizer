@@ -1,18 +1,13 @@
 """Module test_data_interface contains tests for the data_interface module."""
 
-from typing import Any, Union, Dict, Type
-
 import os
 import shutil
+from typing import Any
 
 import pytest
-
 from db import data_interface
 
-
-TESTDATA_DIR = os.environ.get(
-    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
-)
+TESTDATA_DIR = os.environ.get("TESTDATA_DIR", os.path.join("flask", "tests", "testdata"))
 TEST_DATA_FILE_DIR = os.environ.get(
     "TEST_DATA_FILE_DIR", os.path.join("flask", "untracked", "tests", "data")
 )
@@ -57,17 +52,13 @@ def create_test_data_files(testdata_files_dir: str, data_file_dir: str):
         "json",
     ],
 )
-def test_load_data_file(
-    path: str, data_file_type: str, want_data: Any, want_error: Union[str, None]
-):
+def test_load_data_file(path: str, data_file_type: str, want_data: Any, want_error: str | None):
     """Test the load_data_file function."""
     create_test_data_files(
         os.path.join(TESTDATA_DIR, "baseline"),
         TEST_DATA_FILE_DIR,
     )
-    data, error = data_interface.load_data_file(
-        path, data_file_type, TEST_DATA_FILE_DIR
-    )
+    data, error = data_interface.load_data_file(path, data_file_type, TEST_DATA_FILE_DIR)
     assert data == want_data
     assert error == want_error
 
@@ -149,8 +140,8 @@ def test_new_data_file_path(data_file_type: str, want: str):
 def test_analyze_data_file(
     data_file_type: str,
     path: str,
-    want: Union[Dict[str, Any], None],
-    expected_exception: Union[Type[Exception], None],
+    want: dict[str, Any] | None,
+    expected_exception: type[Exception] | None,
 ):
     """Tests analyze data."""
     if expected_exception is not None:

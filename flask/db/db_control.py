@@ -1,20 +1,18 @@
 """Module db_control contains administrative functions for the metadata database."""
 
-from typing import List
-
 import argparse
-import os
-import sys
-import shutil
 import json
+import os
+import shutil
 import subprocess
+import sys
 
 from sqlalchemy.orm import Session
 
 from db import db_interface
 
 
-def parse_args(args: List[str]) -> argparse.Namespace:
+def parse_args(args: list[str]) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Metadata database administration")
     parser.add_argument(
@@ -61,9 +59,7 @@ def parse_args(args: List[str]) -> argparse.Namespace:
     delete_parser.set_defaults(control="delete")
 
     migrate_parser = subparsers.add_parser("migrate", help="Migrate the database.")
-    migrate_parser.add_argument(
-        "--message", type=str, help="Message for the migration."
-    )
+    migrate_parser.add_argument("--message", type=str, help="Message for the migration.")
     migrate_parser.set_defaults(control="migrate")
 
     export_parser = subparsers.add_parser("export", help="Export the database.")
@@ -100,7 +96,7 @@ def create(
     os.makedirs(data_file_dir, exist_ok=True)
     engine = db_interface.make_engine(db_path)
     if db_seed_data:
-        with open(db_seed_data, "r", encoding="utf-8") as file:
+        with open(db_seed_data, encoding="utf-8") as file:
             db_seed_data = json.load(file)
         with Session(engine) as session:
             db_interface.mass_add_objects(session, db_seed_data)
@@ -118,15 +114,11 @@ def delete_db(db_path: str, data_file_dir: str, delete_data_files: bool):
 
 def migrate(message: str):
     """Migrate the database."""
-    subprocess.check_output(
-        ["alembic", "revision", "--autogenerate", "--message", message]
-    )
+    subprocess.check_output(["alembic", "revision", "--autogenerate", "--message", message])
     subprocess.check_output(["alembic", "upgrade", "head"])
 
 
-def export(
-    db_path: str, data_file_dir: str, output_db_file: str, output_data_file_dir: str
-):
+def export(db_path: str, data_file_dir: str, output_db_file: str, output_data_file_dir: str):
     """Export the database."""
     engine = db_interface.make_engine(db_path)
     with Session(engine) as session:
@@ -139,7 +131,7 @@ def export(
     shutil.copytree(data_file_dir, output_data_file_dir)
 
 
-def main(args: List[str]):
+def main(args: list[str]):
     """Main function."""
     args = parse_args(args)
 

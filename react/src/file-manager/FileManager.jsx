@@ -31,9 +31,7 @@ export default function FileManager({ setLoadedFile }) {
             move={(src, dst) => moveObject(src, dst, setStructure, setTags)}
             copy={(src, dst) => copyObject(src, dst, setStructure, setTags)}
             load={(path) => loadObject(path, setLoadedFile)}
-            uploadFile={(file, path) =>
-              uploadFile(file, path, setStructure, setTags)
-            }
+            uploadFile={(file, path) => uploadFile(file, path, setStructure, setTags)}
             uploadFolder={null}
           />
         ) : null}

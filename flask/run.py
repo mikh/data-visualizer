@@ -1,15 +1,13 @@
 """Module run launches the Flask backend."""
 
-from typing import List
-
-import os
 import argparse
+import os
 import sys
 
 import dir_tree_lib
 from db import db_interface
-
 from flask_cors import CORS
+
 from flask import Flask, request, send_from_directory
 
 VERSION_FILE = os.environ.get("VERSION_FILE", os.path.join("flask", "version"))
@@ -28,7 +26,7 @@ def index():
 @app.route("/api/version")
 def version():
     """Gets the version of the Flask backend."""
-    with open(VERSION_FILE, "r", encoding="utf-8") as f:
+    with open(VERSION_FILE, encoding="utf-8") as f:
         return {"version": f.read()}
 
 
@@ -39,9 +37,7 @@ def tree_control():  # pylint: disable=too-many-return-statements
 
     match control:
         case "list":
-            return dir_tree_lib.list_tree(
-                db_interface.make_engine(dir_tree_lib.DB_PATH)
-            )
+            return dir_tree_lib.list_tree(db_interface.make_engine(dir_tree_lib.DB_PATH))
         case "delete":
             return dir_tree_lib.tree_delete(
                 db_interface.make_engine(dir_tree_lib.DB_PATH),
@@ -49,9 +45,7 @@ def tree_control():  # pylint: disable=too-many-return-statements
                 data_file_dir=dir_tree_lib.DATA_FILE_DIR,
             )
         case "move":
-            return dir_tree_lib.move(
-                db_interface.make_engine(dir_tree_lib.DB_PATH), request.json
-            )
+            return dir_tree_lib.move(db_interface.make_engine(dir_tree_lib.DB_PATH), request.json)
         case "load":
             return dir_tree_lib.load(
                 db_interface.make_engine(dir_tree_lib.DB_PATH),
@@ -59,13 +53,9 @@ def tree_control():  # pylint: disable=too-many-return-statements
                 data_file_dir=dir_tree_lib.DATA_FILE_DIR,
             )
         case "copy":
-            return dir_tree_lib.copy(
-                db_interface.make_engine(dir_tree_lib.DB_PATH), request.json
-            )
+            return dir_tree_lib.copy(db_interface.make_engine(dir_tree_lib.DB_PATH), request.json)
         case "update":
-            return dir_tree_lib.update(
-                db_interface.make_engine(dir_tree_lib.DB_PATH), request.json
-            )
+            return dir_tree_lib.update(db_interface.make_engine(dir_tree_lib.DB_PATH), request.json)
         case _:
             return {"error": f"Invalid control: {control}"}
 
@@ -81,7 +71,7 @@ def upload_file():
     )
 
 
-def parse_args(args: List[str]) -> argparse.Namespace:  # pragma: no cover
+def parse_args(args: list[str]) -> argparse.Namespace:  # pragma: no cover
     """Parses command line arguments."""
     parser = argparse.ArgumentParser(description="Flask backend")
     parser.add_argument("--debug", action="store_true", help="Run in debug mode.")

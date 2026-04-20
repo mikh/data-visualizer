@@ -1,14 +1,14 @@
 """Module models contains the models for the metadata database."""
 
-from typing import List, Dict, Any, Union
+from typing import Any, Union
 
-from sqlalchemy import String, Table, Column, Integer, ForeignKey, Float
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.orm import (
     Mapped,
-    mapped_column,
-    declarative_base,
-    relationship,
     Session,
+    declarative_base,
+    mapped_column,
+    relationship,
 )
 
 Base = declarative_base()
@@ -33,21 +33,17 @@ class BaseModel(Base):
         return cls._primary_key
 
     @classmethod
-    def find_by_key(
-        cls, session: Session, key: str, value: Any
-    ) -> Union[None, "BaseModel"]:
+    def find_by_key(cls, session: Session, key: str, value: Any) -> Union[None, "BaseModel"]:
         """Find a model object by key."""
         return session.query(cls).filter(getattr(cls, key) == value).first()
 
     @classmethod
-    def find_by_primary_key(
-        cls, session: Session, value: Any
-    ) -> Union[None, "BaseModel"]:
+    def find_by_primary_key(cls, session: Session, value: Any) -> Union[None, "BaseModel"]:
         """Find a model object by primary key."""
         return cls.find_by_key(session, cls.get_primary_key(), value)
 
     @classmethod
-    def create_new(cls, session: Session, data: Dict[str, Any]) -> "BaseModel":
+    def create_new(cls, session: Session, data: dict[str, Any]) -> "BaseModel":
         """Create a new model object."""
         obj = cls(**data)
         session.add(obj)
@@ -55,11 +51,9 @@ class BaseModel(Base):
         return obj
 
     @classmethod
-    def create_or_get(
-        cls, session: Session, data: Dict[str, Any]
-    ) -> Union[None, "BaseModel"]:
+    def create_or_get(cls, session: Session, data: dict[str, Any]) -> Union[None, "BaseModel"]:
         """Create or get a model object."""
-        value = data.get(cls.get_primary_key(), None)
+        value = data.get(cls.get_primary_key())
         if value is None:
             return None  # pragma: no cover
         obj = cls.find_by_primary_key(session, value)
@@ -67,14 +61,12 @@ class BaseModel(Base):
             obj = cls.create_new(session, data)
         return obj
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the model object to a dictionary."""
-        columns = [
-            column.name for column in self.__table__.columns if column.name != "id"
-        ]
+        columns = [column.name for column in self.__table__.columns if column.name != "id"]
         return {column: getattr(self, column) for column in columns}
 
-    def update_object(self, session: Session, new_data: Dict[str, Any]):
+    def update_object(self, session: Session, new_data: dict[str, Any]):
         """Update object with new data."""
         for key, value in new_data.items():
             setattr(self, key, value)
@@ -93,7 +85,7 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
     data_file_type: Mapped[str] = mapped_column(String, nullable=False)
     data_file_path: Mapped[str] = mapped_column(String, nullable=False)
 
-    tags: Mapped[List["Tag"]] = relationship(
+    tags: Mapped[list["Tag"]] = relationship(
         "Tag",
         secondary="file_tags",
         back_populates="file_metadata",
@@ -104,7 +96,7 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
         back_populates="file_metadata",
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert the file metadata to a dictionary."""
         return {
             "name": self.name,
@@ -115,12 +107,12 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
             "file_stats": self.file_stats.to_dict() if self.file_stats else None,
         }
 
-    def get_tags(self) -> List[str]:
+    def get_tags(self) -> list[str]:
         """Get the tags for the file metadata."""
         return [tag.name for tag in self.tags]
 
     @classmethod
-    def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileMetadata":
+    def create_new(cls, session: Session, data: dict[str, Any]) -> "FileMetadata":
         """Create a new file metadata object."""
         tags = data.pop("tags", [])
         file_stats = data.pop("file_stats", {})
@@ -136,7 +128,7 @@ class FileMetadata(BaseModel):  # pylint: disable=too-few-public-methods
             file_metadata_object.file_stats = file_stats_object
         return file_metadata_object
 
-    def update_object(self, session: Session, new_data: Dict[str, Any]):
+    def update_object(self, session: Session, new_data: dict[str, Any]):
         tags = new_data.pop("tags", None)
         file_stats = new_data.pop("file_stats", None)
         super().update_object(session, new_data)
@@ -165,7 +157,7 @@ class Tag(BaseModel):  # pylint: disable=too-few-public-methods
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
 
-    file_metadata: Mapped[List["FileMetadata"]] = relationship(
+    file_metadata: Mapped[list["FileMetadata"]] = relationship(
         "FileMetadata",
         secondary="file_tags",
         back_populates="tags",
@@ -194,24 +186,22 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
         back_populates="file_stats",
     )
 
-    column_stats: Mapped[List["ColumnStats"]] = relationship(
+    column_stats: Mapped[list["ColumnStats"]] = relationship(
         "ColumnStats",
         back_populates="file_stats",
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Converts the file stats to a dictionary."""
         return {
             "path": self.path,
             "num_columns": self.num_columns,
             "num_rows": self.num_rows,
-            "column_stats": [
-                column_stat.to_dict() for column_stat in self.column_stats
-            ],
+            "column_stats": [column_stat.to_dict() for column_stat in self.column_stats],
         }
 
     @classmethod
-    def create_new(cls, session: Session, data: Dict[str, Any]) -> "FileStats":
+    def create_new(cls, session: Session, data: dict[str, Any]) -> "FileStats":
         """Create a new file stats object."""
         column_stats = data.pop("column_stats", [])
         file_stats_object = cls(**data)
@@ -231,7 +221,7 @@ class FileStats(BaseModel):  # pylint: disable=too-few-public-methods
                     return column
         return None
 
-    def update_object(self, session: Session, new_data: Dict[str, Any]):
+    def update_object(self, session: Session, new_data: dict[str, Any]):
         column_stats = new_data.pop("column_stats", None)
         super().update_object(session, new_data)
 
@@ -254,9 +244,7 @@ class ColumnStats(BaseModel):  # pylint: disable=too-few-public-methods
     _primary_key = "column_name"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    file_stats_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("file_stats.id"), nullable=True
-    )
+    file_stats_id: Mapped[int] = mapped_column(Integer, ForeignKey("file_stats.id"), nullable=True)
     column_name: Mapped[str] = mapped_column(String, nullable=False)
     data_type: Mapped[str] = mapped_column(String, nullable=False)
     num_rows: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -279,7 +267,7 @@ class ColumnStats(BaseModel):  # pylint: disable=too-few-public-methods
         back_populates="column_stats",
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Converts the column stats to a dictionary."""
         output = super().to_dict()
         output.pop("file_stats_id")

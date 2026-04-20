@@ -36,10 +36,7 @@ export default function GraphPanel({ rows, headers }) {
 
       {isExpanded && (
         <div className="p-4 space-y-4">
-          <GraphTypeSelector
-            selected={selectedGraphType}
-            onSelect={handleGraphTypeChange}
-          />
+          <GraphTypeSelector selected={selectedGraphType} onSelect={handleGraphTypeChange} />
 
           {selectedGraphType && (
             <ColumnSelector
