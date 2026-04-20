@@ -6,17 +6,53 @@ clone:
   skip_verify: true
 
 steps:
+  - name: lint-python
+    image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
+    depends_on: []
+    commands:
+      - pip install -r flask/requirements.txt
+      - ruff check flask infra-scripts
+      - ruff format --check flask infra-scripts
+  - name: lint-bash
+    image: alpine:3.19
+    depends_on: []
+    commands:
+      - apk add --no-cache shellcheck shfmt
+      - shellcheck infra-scripts/*.sh flask/*.sh react/*.sh
+      - shfmt -d -i 2 -ci infra-scripts/*.sh flask/*.sh react/*.sh
+  - name: lint-react
+    image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
+    depends_on: []
+    commands:
+      - cd react
+      - npm ci
+      - npm run lint
+      - npm run format:check
+  - name: lint-helm
+    image: alpine/helm:3.14.0
+    depends_on: []
+    commands:
+      - helm lint helm-chart/data-visualizer
   - name: pytests
     image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
+    depends_on:
+      - lint-python
+      - lint-bash
+      - lint-react
+      - lint-helm
     commands:
       - pip install -r flask/requirements.txt
       - ./infra-scripts/run-pytests.sh
   - name: jest
     image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
+    depends_on:
+      - pytests
     commands:
       - ./infra-scripts/run-jest.sh
   - name: cypress
     image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
+    depends_on:
+      - jest
     commands:
       - python3 -m venv .venv
       - . .venv/bin/activate
@@ -24,6 +60,8 @@ steps:
       - ./infra-scripts/run-cypress.sh
   - name: build-image
     image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest
+    depends_on:
+      - cypress
     volumes:
       - name: dockersock
         path: /var/run
@@ -38,6 +76,8 @@ steps:
       - ./infra-scripts/build-image.sh --push --git-tag --latest --image-path harbor.cantrip.com/webapps/data-visualizer/flask
   - name: version-check
     image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
+    depends_on:
+      - build-image
     commands:
       - git fetch origin +refs/heads/main:refs/remotes/origin/main
       - python infra-scripts/version_bump.py --config infra-scripts/version-config.json --compare-to-branch --branch origin/main
