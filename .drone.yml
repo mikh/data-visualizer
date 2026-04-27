@@ -10,7 +10,6 @@ steps:
     image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
     depends_on: []
     commands:
-      - pip install uv
       - uv sync --frozen
       - uv run ruff check flask infra-scripts
       - uv run ruff format --check flask infra-scripts
@@ -42,7 +41,6 @@ steps:
       - lint-react
       - lint-helm
     commands:
-      - pip install uv
       - uv sync --frozen
       - ./infra-scripts/run-pytests.sh
   - name: jest
@@ -56,7 +54,6 @@ steps:
     depends_on:
       - jest
     commands:
-      - pip install uv
       - uv sync --frozen
       - ./infra-scripts/run-cypress.sh
   - name: build-image
