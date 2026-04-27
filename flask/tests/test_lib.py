@@ -7,13 +7,13 @@ def dict_compare(a: Any, b: Any) -> bool:
     """Compare two dictionaries or lists."""
     assert isinstance(a, type(b)), f"Types do not match {type(a)} != {type(b)}"
     if isinstance(a, dict):
-        assert sorted(a.keys()) == sorted(
-            b.keys()
-        ), f"Keys do not match: {sorted(a.keys())} != {sorted(b.keys())}"
+        assert sorted(a.keys()) == sorted(b.keys()), (
+            f"Keys do not match: {sorted(a.keys())} != {sorted(b.keys())}"
+        )
         for key in a:
-            assert isinstance(
-                a[key], type(b[key])
-            ), f"Types do not match for key {key}: {type(a[key])} != {type(b[key])}"
+            assert isinstance(a[key], type(b[key])), (
+                f"Types do not match for key {key}: {type(a[key])} != {type(b[key])}"
+            )
             if isinstance(a[key], dict | list):
                 dict_compare(a[key], b[key])
             else:
