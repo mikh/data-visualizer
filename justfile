@@ -35,12 +35,12 @@ helm-upgrade:
 
 [group("version")]
 version-list:
-    python infra-scripts/version_bump.py \
+    uv run python infra-scripts/version_bump.py \
         --config infra-scripts/version-config.json \
         --list
 
 [group("version")]
 version-bump flags:
-    python infra-scripts/version_bump.py \
+    uv run python infra-scripts/version_bump.py \
         --config infra-scripts/version-config.json \
         --bump "{{flags}}"
