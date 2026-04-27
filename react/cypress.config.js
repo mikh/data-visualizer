@@ -7,7 +7,7 @@ export default defineConfig({
     specPattern: "cypress/e2e/**/*.cy.{js,jsx}",
     viewportWidth: 1280,
     viewportHeight: 900,
-    setupNodeEvents(on, config) {
+    setupNodeEvents(on) {
       on("task", {
         log(message) {
           console.log(message);
