@@ -30,8 +30,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-# shellcheck source=/dev/null
-. .venv/bin/activate
+uv sync
 
 cd flask
 
@@ -51,7 +50,7 @@ else
   data_seed_dir="tests/testdata/baseline"
 fi
 
-python -m db.db_control \
+uv run python -m db.db_control \
   --db-path "$DB_PATH" \
   --data-file-dir "$FILE_BASE_DIR" \
   create \
@@ -59,6 +58,6 @@ python -m db.db_control \
   --db-seed-data "$db_seed_file" \
   --data-seed-dir "$data_seed_dir"
 
-python run.py --debug --port 5000 --host 127.0.0.1
+uv run python run.py --debug --port 5000 --host 127.0.0.1
 
 echo "Flask runner exited."

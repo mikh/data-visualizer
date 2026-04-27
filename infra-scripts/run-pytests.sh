@@ -54,24 +54,24 @@ export TEST_DB_JSON_PATH="tests/testdata/baseline-db.json"
 export COMPLETE_EXPORT_DB_JSON_PATH="tests/testdata/complete-export-db.json"
 export VERSION_FILE="version"
 
-coverage run \
+uv run coverage run \
   --source="." \
   --omit="$omit" \
   --data-file="$output_dir/.coverage" \
   -m pytest
 
-coverage html \
+uv run coverage html \
   --data-file="$output_dir/.coverage" \
   --directory="$output_dir/html"
 
 printf "\n\nREPORT:\n\n"
-coverage report \
+uv run coverage report \
   -m \
   --data-file "$output_dir/.coverage" |
   tee "$output_dir/coverage.log"
 printf "\n\nRESULT:\n\n"
 
-total=$(coverage report --format=total --data-file "$output_dir/.coverage")
+total=$(uv run coverage report --format=total --data-file "$output_dir/.coverage")
 if ((total < min_passing_coverage)); then
   echo "Total coverage (${total}%) is less than minimum passing coverage (${min_passing_coverage}%)"
   exit 1

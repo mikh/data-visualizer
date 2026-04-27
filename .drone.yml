@@ -10,9 +10,10 @@ steps:
     image: harbor.cantrip.com/ci-tools/python-tester-runner:latest
     depends_on: []
     commands:
-      - pip install -r flask/requirements.txt
-      - ruff check flask infra-scripts
-      - ruff format --check flask infra-scripts
+      - pip install uv
+      - uv sync --frozen
+      - uv run ruff check flask infra-scripts
+      - uv run ruff format --check flask infra-scripts
   - name: lint-bash
     image: alpine:3.19
     depends_on: []
@@ -41,7 +42,8 @@ steps:
       - lint-react
       - lint-helm
     commands:
-      - pip install -r flask/requirements.txt
+      - pip install uv
+      - uv sync --frozen
       - ./infra-scripts/run-pytests.sh
   - name: jest
     image: harbor.cantrip.com/ci-tools/node-tester-runner:latest
@@ -54,9 +56,8 @@ steps:
     depends_on:
       - jest
     commands:
-      - python3 -m venv .venv
-      - . .venv/bin/activate
-      - pip install -r flask/requirements.txt
+      - pip install uv
+      - uv sync --frozen
       - ./infra-scripts/run-cypress.sh
   - name: build-image
     image: harbor.cantrip.com/ci-tools/dind-builder-runner:latest

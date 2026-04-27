@@ -30,8 +30,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-# shellcheck source=/dev/null
-. .venv/bin/activate
+uv sync
 
 # Set up Flask with test data
 cd flask
@@ -45,7 +44,7 @@ export DATA_FILE_DIR="$FILE_BASE_DIR"
 mkdir -p "$FILE_BASE_DIR"
 mkdir -p "$LOG_DIR"
 
-python -m db.db_control \
+uv run python -m db.db_control \
   --db-path "$DB_PATH" \
   --data-file-dir "$FILE_BASE_DIR" \
   create \
@@ -54,7 +53,7 @@ python -m db.db_control \
   --data-seed-dir "tests/testdata/baseline"
 
 # Start Flask in background
-python run.py --port 5000 --host 127.0.0.1 &
+uv run python run.py --port 5000 --host 127.0.0.1 &
 flask_pid=$!
 
 cd ../react

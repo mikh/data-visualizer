@@ -18,14 +18,18 @@ RUN npm install && npm run build
 # Stage 2: Flask + static files
 FROM python:3.11-slim
 WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+ENV UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
 COPY flask/*.py ./
 COPY flask/db ./db
 COPY flask/data ./data
-COPY flask/requirements.txt ./
 COPY flask/run-container.sh ./
 COPY flask/version ./
 COPY --from=react-build /app/dist ./static
 RUN mkdir -p untracked untracked/data untracked/logs
-RUN pip install -r requirements.txt
 RUN chmod +x run-container.sh
 CMD ["./run-container.sh"]

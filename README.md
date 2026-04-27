@@ -21,7 +21,7 @@ CI runs four parallel lint jobs (Python, Bash, React, Helm) on every build and f
 | React    | eslint     | prettier           |
 | Helm     | helm lint  | (n/a)              |
 
-Python (`ruff`, `pre-commit`) and React (`prettier`) tools are installed via `flask/requirements.txt` and `react/package.json`. The tools below are external binaries and must be installed on your system.
+Python (`ruff`, `pre-commit`) and React (`prettier`) tools are installed via `pyproject.toml` (managed by `uv`) and `react/package.json`. The tools below are external binaries and must be installed on your system.
 
 ### Installing external tools
 
@@ -63,8 +63,8 @@ brew install helm
 Install Python deps and enable the hook:
 
 ```bash
-pip install -r flask/requirements.txt
-pre-commit install
+uv sync
+uv run pre-commit install
 ```
 
 After that, `git commit` will run formatters and linters against staged files. To run all hooks against the whole repo:
