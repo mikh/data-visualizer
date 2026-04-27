@@ -33,9 +33,7 @@ describe("File Tree", () => {
     it("shows nested subfolders", () => {
       cy.expandTree();
       cy.contains("[data-cy='tree-folder']", "test-folder-3").click();
-      cy.contains("[data-cy='tree-folder']", "test-sub-folder-1").should(
-        "be.visible"
-      );
+      cy.contains("[data-cy='tree-folder']", "test-sub-folder-1").should("be.visible");
     });
 
     it("expands nested subfolders to show deeply nested files", () => {

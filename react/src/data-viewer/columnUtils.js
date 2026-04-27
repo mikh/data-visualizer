@@ -16,9 +16,7 @@ function isDate(value) {
 
 export function inferColumnType(rows, colIndex) {
   const sample = rows.slice(0, SAMPLE_SIZE);
-  const nonEmpty = sample
-    .map((row) => row[colIndex])
-    .filter((v) => v != null && v !== "");
+  const nonEmpty = sample.map((row) => row[colIndex]).filter((v) => v != null && v !== "");
 
   if (nonEmpty.length === 0) return "categorical";
 
@@ -40,9 +38,7 @@ export function inferAllColumnTypes(rows, headers) {
 }
 
 export function computeColumnStats(rows, colIndex, type) {
-  const values = rows
-    .map((row) => row[colIndex])
-    .filter((v) => v != null && v !== "");
+  const values = rows.map((row) => row[colIndex]).filter((v) => v != null && v !== "");
 
   if (type === "numeric") {
     const nums = values.map(Number).filter((n) => !isNaN(n));

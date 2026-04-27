@@ -1,0 +1,51 @@
+[project]
+name = "data-visualizer"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "flask",
+    "flask-cors",
+    "sqlalchemy",
+    "pandas",
+    "pyyaml",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "coverage",
+    "ruff==0.15.12",
+    "pre-commit",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [
+    ".venv",
+    "react/node_modules",
+    "react/dist",
+    "flask/untracked",
+    "flask/tests/testdata",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+]
+ignore = [
+    "E501", # line length handled by formatter
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

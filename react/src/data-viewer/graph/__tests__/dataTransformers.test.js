@@ -38,8 +38,8 @@ describe("transformForLineChart", () => {
     it("filters out rows with null x or y", () => {
       const rows = [
         ["1", "10", ""],
-        ["", "20", ""],   // null x
-        ["3", "", ""],    // null y
+        ["", "20", ""], // null x
+        ["3", "", ""], // null y
         ["4", "abc", ""], // non-numeric y
       ];
       const result = transformForLineChart(rows, headers, "x", ["y1"], "numeric");
@@ -48,7 +48,10 @@ describe("transformForLineChart", () => {
     });
 
     it("returns empty array when all data is invalid", () => {
-      const rows = [["", "", ""], [null, null, ""]];
+      const rows = [
+        ["", "", ""],
+        [null, null, ""],
+      ];
       const result = transformForLineChart(rows, headers, "x", ["y1"], "numeric");
       expect(result).toEqual([]);
     });
@@ -70,8 +73,8 @@ describe("transformForLineChart", () => {
 
     it("each series filters independently", () => {
       const rows = [
-        ["1", "10", ""],   // y2 is empty
-        ["2", "", "200"],  // y1 is empty
+        ["1", "10", ""], // y2 is empty
+        ["2", "", "200"], // y1 is empty
       ];
       const result = transformForLineChart(rows, headers, "x", ["y1", "y2"], "numeric");
       expect(result[0].data).toHaveLength(1); // y1 only has row 0
@@ -84,7 +87,7 @@ describe("transformForLineChart", () => {
   it("preserves rowIndex metadata", () => {
     const rows = [
       ["1", "10", ""],
-      ["2", "abc", ""],  // filtered out
+      ["2", "abc", ""], // filtered out
       ["3", "30", ""],
     ];
     const result = transformForLineChart(rows, headers, "x", ["y1"], "numeric");
@@ -142,10 +145,10 @@ describe("transformForBarChart", () => {
 
   it("filters out rows with empty x or non-numeric y", () => {
     const rows = [
-      ["", "10"],     // empty x
-      ["a", "abc"],   // non-numeric y
-      ["b", ""],      // empty y
-      ["c", "30"],    // valid
+      ["", "10"], // empty x
+      ["a", "abc"], // non-numeric y
+      ["b", ""], // empty y
+      ["c", "30"], // valid
     ];
     const result = transformForBarChart(rows, headers, "category", "value");
     expect(result).toHaveLength(1);
@@ -153,7 +156,10 @@ describe("transformForBarChart", () => {
   });
 
   it("returns empty array when no valid data", () => {
-    const rows = [["", ""], [null, null]];
+    const rows = [
+      ["", ""],
+      [null, null],
+    ];
     const result = transformForBarChart(rows, headers, "category", "value");
     expect(result).toEqual([]);
   });
@@ -190,9 +196,7 @@ describe("transformForScatterPlot", () => {
   it("handles zero values", () => {
     const rows = [["0", "0"]];
     const result = transformForScatterPlot(rows, headers, "x", "y");
-    expect(result).toEqual([
-      { key: 0, data: 0, metadata: { rowIndex: 0 } },
-    ]);
+    expect(result).toEqual([{ key: 0, data: 0, metadata: { rowIndex: 0 } }]);
   });
 
   it("handles negative values", () => {
@@ -321,10 +325,10 @@ describe("transformForHeatmap", () => {
 
   it("filters rows with null keys or non-numeric values", () => {
     const rows = [
-      [null, "r1", "10"],   // null x
-      ["a", null, "20"],    // null y
-      ["b", "r1", "abc"],   // non-numeric value
-      ["c", "r1", "30"],    // valid
+      [null, "r1", "10"], // null x
+      ["a", null, "20"], // null y
+      ["b", "r1", "abc"], // non-numeric value
+      ["c", "r1", "30"], // valid
     ];
     const result = transformForHeatmap(rows, headers, "x", "y", "value");
     expect(result).toHaveLength(1);

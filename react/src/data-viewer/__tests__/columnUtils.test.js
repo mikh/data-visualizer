@@ -1,8 +1,4 @@
-import {
-  inferColumnType,
-  inferAllColumnTypes,
-  computeColumnStats,
-} from "../columnUtils";
+import { inferColumnType, inferAllColumnTypes, computeColumnStats } from "../columnUtils";
 
 // ─── inferColumnType ────────────────────────────────────────────────────────
 
@@ -33,11 +29,7 @@ describe("inferColumnType", () => {
   });
 
   it("returns 'date' for date-time strings", () => {
-    const rows = [
-      ["2024-01-01T10:00:00"],
-      ["2024-06-15T12:30:00"],
-      ["2024-12-31T23:59:59"],
-    ];
+    const rows = [["2024-01-01T10:00:00"], ["2024-06-15T12:30:00"], ["2024-12-31T23:59:59"]];
     expect(inferColumnType(rows, 0)).toBe("date");
   });
 

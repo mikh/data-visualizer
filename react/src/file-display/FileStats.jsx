@@ -10,9 +10,7 @@ export default function FileStats({ fileStats }) {
 
   // Filter out properties we want to exclude
   const excludedKeys = ["column_stats", "path"];
-  const statsToDisplay = Object.entries(fileStats).filter(
-    ([key]) => !excludedKeys.includes(key)
-  );
+  const statsToDisplay = Object.entries(fileStats).filter(([key]) => !excludedKeys.includes(key));
 
   // Format the key names for display (convert snake_case to Title Case)
   const formatKey = (key) => {
@@ -48,10 +46,7 @@ export default function FileStats({ fileStats }) {
               </thead>
               <tbody>
                 {statsToDisplay.map(([key, value]) => (
-                  <tr
-                    key={key}
-                    className="hover:bg-slate-50 border-b border-slate-100"
-                  >
+                  <tr key={key} className="hover:bg-slate-50 border-b border-slate-100">
                     <td className="px-3 py-1.5 text-xs font-medium text-slate-600 whitespace-nowrap">
                       {formatKey(key)}
                     </td>
@@ -67,9 +62,7 @@ export default function FileStats({ fileStats }) {
       </div>
 
       {/* Display column statistics if they exist */}
-      {fileStats.column_stats && (
-        <ColumnStats columnStats={fileStats.column_stats} />
-      )}
+      {fileStats.column_stats && <ColumnStats columnStats={fileStats.column_stats} />}
     </div>
   );
 }

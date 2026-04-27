@@ -75,11 +75,7 @@ export function deleteObject(path, setStructure, setTags) {
             "Would you like to delete the entry anyway?"
         );
         if (shouldForce) {
-          performRequest(
-            { control: "delete", path: path, force: true },
-            setStructure,
-            setTags
-          );
+          performRequest({ control: "delete", path: path, force: true }, setStructure, setTags);
         }
         return;
       }

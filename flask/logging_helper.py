@@ -1,8 +1,8 @@
 """Module logging_setup helps setup logging for another module."""
 
-import os
 import logging
 import logging.handlers
+import os
 
 
 def init_logging(

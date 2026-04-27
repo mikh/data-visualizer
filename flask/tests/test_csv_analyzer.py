@@ -3,11 +3,10 @@
 import os
 
 from data import csv_analyzer
+
 from tests.test_lib import dict_compare
 
-TESTDATA_DIR = os.environ.get(
-    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
-)
+TESTDATA_DIR = os.environ.get("TESTDATA_DIR", os.path.join("flask", "tests", "testdata"))
 
 
 def test_analyze_csv_stats():

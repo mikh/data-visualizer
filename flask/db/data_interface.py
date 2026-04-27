@@ -1,29 +1,25 @@
 """Module data_interface contains functions to interface with data files."""
 
-from typing import Any, Tuple, Dict
-
-import os
-import json
-
 import csv
+import json
+import os
+from typing import Any
 
 from data import csv_analyzer
 
 
-def load_data_file(
-    path: str, data_file_type: str, data_file_dir: str
-) -> Tuple[Any, str]:
+def load_data_file(path: str, data_file_type: str, data_file_dir: str) -> tuple[Any, str]:
     """Loads a data file."""
     full_path = os.path.join(data_file_dir, path)
     if not os.path.exists(full_path):
         return None, f"Data file not found for path {path}."
     match data_file_type:
         case "json":
-            with open(full_path, "r", encoding="utf-8") as f:
+            with open(full_path, encoding="utf-8") as f:
                 data = json.load(f)
             return data, ""
         case "csv":
-            with open(full_path, "r", encoding="utf-8") as f:
+            with open(full_path, encoding="utf-8") as f:
                 data = list(csv.reader(f))
             return data, ""
         case _:
@@ -33,9 +29,7 @@ def load_data_file(
 def new_data_file_path(data_file_type: str, data_file_dir: str) -> str:
     """Creates a new data file path."""
     files = os.listdir(data_file_dir)
-    files = [
-        x.replace(f".{data_file_type}", "") for x in files if x.endswith(data_file_type)
-    ]
+    files = [x.replace(f".{data_file_type}", "") for x in files if x.endswith(data_file_type)]
     last_filename = 0
     for file in files:
         try:
@@ -47,7 +41,7 @@ def new_data_file_path(data_file_type: str, data_file_dir: str) -> str:
     return f"{last_filename}.{data_file_type}"
 
 
-def analyze_data_file(data_file_type: str, data_file_path: str) -> Dict[str, Any]:
+def analyze_data_file(data_file_type: str, data_file_path: str) -> dict[str, Any]:
     """Analyzes a data file."""
     match data_file_type:
         case "csv":

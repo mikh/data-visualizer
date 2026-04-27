@@ -52,24 +52,15 @@ describe("Chart Visualization", () => {
 
       it("highlights the selected chart type button", () => {
         cy.contains("button", "Bar Chart").click();
-        cy.contains("button", "Bar Chart").should(
-          "have.class",
-          "bg-slate-800"
-        );
+        cy.contains("button", "Bar Chart").should("have.class", "bg-slate-800");
       });
 
       it("unhighlights previously selected chart type", () => {
         cy.contains("button", "Bar Chart").click();
         cy.contains("button", "Line Chart").click();
 
-        cy.contains("button", "Bar Chart").should(
-          "not.have.class",
-          "bg-slate-800"
-        );
-        cy.contains("button", "Line Chart").should(
-          "have.class",
-          "bg-slate-800"
-        );
+        cy.contains("button", "Bar Chart").should("not.have.class", "bg-slate-800");
+        cy.contains("button", "Line Chart").should("have.class", "bg-slate-800");
       });
     });
 
@@ -86,10 +77,7 @@ describe("Chart Visualization", () => {
       it("shows column options in dropdowns", () => {
         // test-file-1 has string columns (column-1, column-5)
         // Bar chart X accepts categorical, so both should be available
-        cy.contains("label", "X Axis")
-          .parent()
-          .find("select")
-          .should("exist");
+        cy.contains("label", "X Axis").parent().find("select").should("exist");
       });
     });
 
@@ -108,19 +96,13 @@ describe("Chart Visualization", () => {
         cy.contains("button", "Bar Chart").click();
 
         // Select a column in the X axis dropdown
-        cy.contains("label", "X Axis")
-          .parent()
-          .find("select")
-          .select(1);
+        cy.contains("label", "X Axis").parent().find("select").select(1);
 
         // Switch chart type
         cy.contains("button", "Scatter Plot").click();
 
         // Dropdowns should be reset to default
-        cy.contains("label", "X Axis")
-          .parent()
-          .find("select")
-          .should("have.value", "");
+        cy.contains("label", "X Axis").parent().find("select").should("have.value", "");
       });
     });
   });
@@ -170,9 +152,7 @@ describe("Chart Visualization", () => {
     it("shows message when no eligible numeric columns exist for Y axis", () => {
       // test-file-1 has only string columns, so no numeric columns for Y
       // The Y axis should show "No numeric columns" or similar
-      cy.contains("label", "Y Axis")
-        .parent()
-        .should("exist");
+      cy.contains("label", "Y Axis").parent().should("exist");
     });
   });
 

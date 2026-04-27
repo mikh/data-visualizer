@@ -141,9 +141,7 @@ export default function ColumnStats({ columnStats }) {
                           onMouseEnter={() => setHoveredColumn(column)}
                           onMouseLeave={() => setHoveredColumn(null)}
                           className={`px-3 py-1.5 text-xs border-b border-slate-100 ${
-                            isEnabled
-                              ? `text-slate-700 ${highlight}`
-                              : "text-slate-300 bg-slate-50"
+                            isEnabled ? `text-slate-700 ${highlight}` : "text-slate-300 bg-slate-50"
                           } whitespace-nowrap ${
                             column === "column_name"
                               ? "sticky left-0 z-10 border-r border-slate-200 bg-white group-hover:bg-slate-50"
@@ -155,9 +153,7 @@ export default function ColumnStats({ columnStats }) {
                               : undefined
                           }
                           title={
-                            !isEnabled
-                              ? `Not applicable for ${stat.data_type} type`
-                              : undefined
+                            !isEnabled ? `Not applicable for ${stat.data_type} type` : undefined
                           }
                         >
                           {isEnabled ? formatValue(value) : "—"}

@@ -1,15 +1,12 @@
 """Module dir_tree_lib contains functions to view and modify the folder tree."""
 
-from typing import List, Any, Dict, Union
-
 import os
-
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
+from typing import Any
 
 import logging_helper
-from db import db_interface
-from db import data_interface
+from db import data_interface, db_interface
+from sqlalchemy import Engine
+from sqlalchemy.orm import Session
 
 VERBOSE = os.environ.get("VERBOSE_LOGGING", "false").lower() == "true"
 LOG_DIRECTORY = os.environ.get("LOG_DIR", os.path.join("flask", "untracked", "logs"))
@@ -18,19 +15,17 @@ DATA_FILE_DIR = os.environ.get("DATA_FILE_DIR", os.path.join("untracked", "data"
 
 SUPPORTED_FILE_TYPES = ["csv", "json"]
 
-logger = logging_helper.init_logging(
-    __name__, VERBOSE, LOG_DIRECTORY, "dir_tree_lib.log"
-)
+logger = logging_helper.init_logging(__name__, VERBOSE, LOG_DIRECTORY, "dir_tree_lib.log")
 
 
-def get_all_tags(engine: Engine) -> Union[List[str]]:
+def get_all_tags(engine: Engine) -> list[str]:
     """Gets all tags from the database."""
     return [tag["name"] for tag in db_interface.get_all_of_model(engine, "tag")]
 
 
 def list_tree(
     engine: Engine,
-) -> Dict[str, Union[Dict[str, Any], List[str]]]:
+) -> dict[str, dict[str, Any] | list[str]]:
     """List all files and folders in the tree."""
     logger.debug("control=%s", "list")
 
@@ -43,11 +38,8 @@ def list_tree(
         cur_folder = structure
         cur_path = ""
         for folder in path[:-1]:
-            if cur_path:
-                cur_path = os.path.join(cur_path, folder)
-            else:
-                cur_path = folder
-            if not folder in cur_folder:
+            cur_path = os.path.join(cur_path, folder) if cur_path else folder
+            if folder not in cur_folder:
                 cur_folder[folder] = {
                     "type": "folder",
                     "full-path": cur_path,
@@ -65,9 +57,9 @@ def list_tree(
 
 def tree_delete(
     engine: Engine,
-    request_json: Dict[str, Any],
+    request_json: dict[str, Any],
     data_file_dir: str = DATA_FILE_DIR,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Delete a file."""
     path = request_json.get("path", "")
     if not path:
@@ -75,9 +67,7 @@ def tree_delete(
         return {"error": "Path cannot be empty."}
     logger.debug("control=%s, path=%s", "delete", path)
     with Session(engine) as session:
-        file_metadata = db_interface.get_db_object_by_key(
-            session, "file_metadata", "path", path
-        )
+        file_metadata = db_interface.get_db_object_by_key(session, "file_metadata", "path", path)
 
         if file_metadata is None:
             logger.error("File metadata not found for path %s.", path)
@@ -109,7 +99,7 @@ def tree_delete(
     return {}
 
 
-def move(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+def move(engine: Engine, request_json: dict[str, Any]) -> dict[str, str]:
     """Moves a file."""
     source = request_json.get("source", "")
     dest = request_json.get("dest", "")
@@ -138,7 +128,7 @@ def move(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
     return {}
 
 
-def copy(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+def copy(engine: Engine, request_json: dict[str, Any]) -> dict[str, str]:
     """Moves a file."""
     source = request_json.get("source", "")
     dest = request_json.get("dest", "")
@@ -179,8 +169,8 @@ def copy(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
 
 
 def load(
-    engine: Engine, request_json: Dict[str, Any], data_file_dir: str = DATA_FILE_DIR
-) -> Dict[str, Union[str, Any]]:
+    engine: Engine, request_json: dict[str, Any], data_file_dir: str = DATA_FILE_DIR
+) -> dict[str, str | Any]:
     """Loads a data file."""
     path = request_json.get("path", "")
     if not path:
@@ -188,9 +178,7 @@ def load(
         return {"error": "Path cannot be empty."}
     logger.debug("control=%s, path=%s", "load", path)
     with Session(engine) as session:
-        file_metadata = db_interface.get_db_object_by_key(
-            session, "file_metadata", "path", path
-        )
+        file_metadata = db_interface.get_db_object_by_key(session, "file_metadata", "path", path)
         if file_metadata is None:
             logger.error("File metadata not found for path %s.", path)
             return {"error": f"File metadata not found for path {path}."}
@@ -212,12 +200,12 @@ def load(
 
 def upload(
     engine: Engine,
-    request_files: Dict[str, Any],
-    request_form: Dict[str, Any],
+    request_files: dict[str, Any],
+    request_form: dict[str, Any],
     data_file_dir: str = DATA_FILE_DIR,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Upload a file to the visualizer."""
-    if not "file" in request_files:
+    if "file" not in request_files:
         logger.error("File not found in request.")
         return {"error": "File not found in request."}
     file = request_files["file"]
@@ -230,15 +218,13 @@ def upload(
         logger.error("File type %s is not supported.", extension)
         return {"error": f"File type {extension} is not supported."}
 
-    if not "path" in request_form:
+    if "path" not in request_form:
         logger.error("Path not found in request.")
         return {"error": "Path not found in request."}
     path = request_form["path"]
 
     with Session(engine) as session:
-        file_metadata = db_interface.get_db_object_by_key(
-            session, "file_metadata", "path", path
-        )
+        file_metadata = db_interface.get_db_object_by_key(session, "file_metadata", "path", path)
         if file_metadata is not None:
             logger.error("Path %s already exists.", path)
             return {"error": f"Path {path} already exists."}
@@ -267,7 +253,7 @@ def upload(
     return {}
 
 
-def update(engine: Engine, request_json: Dict[str, Any]) -> Dict[str, str]:
+def update(engine: Engine, request_json: dict[str, Any]) -> dict[str, str]:
     """Updates a file."""
     logger.debug("control=%s", "update")
 

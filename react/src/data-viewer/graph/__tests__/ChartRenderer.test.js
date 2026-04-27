@@ -7,11 +7,7 @@ function hasRequiredColumns(graphType, selectedColumns) {
   switch (graphType) {
     case "line":
     case "area":
-      return (
-        selectedColumns.x &&
-        selectedColumns.y &&
-        selectedColumns.y.length > 0
-      );
+      return selectedColumns.x && selectedColumns.y && selectedColumns.y.length > 0;
     case "bar":
       return selectedColumns.x && selectedColumns.y;
     case "scatter":
@@ -81,9 +77,7 @@ describe("hasRequiredColumns", () => {
 
   describe("heatmap", () => {
     it("returns truthy with x, y, and value", () => {
-      expect(
-        hasRequiredColumns("heatmap", { x: "a", y: "b", value: "c" })
-      ).toBeTruthy();
+      expect(hasRequiredColumns("heatmap", { x: "a", y: "b", value: "c" })).toBeTruthy();
     });
 
     it("returns falsy with any missing field", () => {

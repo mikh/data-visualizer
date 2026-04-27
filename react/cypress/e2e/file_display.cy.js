@@ -74,12 +74,8 @@ describe("File Display", () => {
 
     it("displays correct stat values", () => {
       // baseline-db.json has num_columns: 2, num_rows: 2 for test-file-1
-      cy.contains("td", "Num Columns")
-        .siblings("td")
-        .should("contain", "2");
-      cy.contains("td", "Num Rows")
-        .siblings("td")
-        .should("contain", "2");
+      cy.contains("td", "Num Columns").siblings("td").should("contain", "2");
+      cy.contains("td", "Num Rows").siblings("td").should("contain", "2");
     });
 
     it("collapses file statistics when header is clicked", () => {

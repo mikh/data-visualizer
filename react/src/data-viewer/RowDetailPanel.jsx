@@ -4,10 +4,7 @@ export default function RowDetailPanel({ row, headers, onClose }) {
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/20 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/20 z-40" onClick={onClose} />
 
       {/* Panel */}
       <div className="fixed top-0 right-0 h-full w-96 max-w-full bg-white shadow-xl z-50 flex flex-col transform transition-transform duration-200 translate-x-0">

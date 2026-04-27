@@ -1,26 +1,23 @@
 """Module test_run contains tests for the run module."""
 
-from typing import Dict, Any
-
-import os
-import json
-import shutil
 import io
+import json
+import os
+import shutil
+from typing import Any
 
+import dir_tree_lib
 import pytest
+import run
+from db import db_interface
 from werkzeug.datastructures import FileStorage
 
-import run
-import dir_tree_lib
-from db import db_interface
 from tests import test_dir_tree_lib
 
 VERSION_FILE = os.environ.get("VERSION_FILE", os.path.join("flask", "version"))
 
 # Test configuration
-TESTDATA_DIR = os.environ.get(
-    "TESTDATA_DIR", os.path.join("flask", "tests", "testdata")
-)
+TESTDATA_DIR = os.environ.get("TESTDATA_DIR", os.path.join("flask", "tests", "testdata"))
 TEST_DB_JSON_PATH = os.environ.get(
     "TEST_DB_JSON_PATH", os.path.join(TESTDATA_DIR, "baseline-db.json")
 )
@@ -45,7 +42,7 @@ def setup_test_environment():
     # Create test database
     engine = db_interface.make_engine(test_db_path)
     with db_interface.Session(engine) as session:
-        with open(TEST_DB_JSON_PATH, "r", encoding="utf-8") as file:
+        with open(TEST_DB_JSON_PATH, encoding="utf-8") as file:
             test_db_json = json.load(file)
         db_interface.mass_add_objects(session, test_db_json)
 
@@ -54,7 +51,7 @@ def setup_test_environment():
 
 def test_version():
     """Tests version."""
-    with open(VERSION_FILE, "r", encoding="utf-8") as file:
+    with open(VERSION_FILE, encoding="utf-8") as file:
         want = file.read()
     got_response = run.app.test_client().get("/api/version")
     assert got_response.status_code == 200
@@ -203,7 +200,7 @@ def test_version():
         "invalid-control",
     ],
 )
-def test_tree_control(request_json: Dict[str, Any], want_response: Dict[str, Any]):
+def test_tree_control(request_json: dict[str, Any], want_response: dict[str, Any]):
     """Test the tree control function."""
     # Set up test environment
     test_db_path = setup_test_environment()
@@ -250,9 +247,7 @@ def test_upload_file():
         data = {
             "path": "test-folder-1/test-upload",
             "file": (
-                FileStorage(
-                    filename="test.csv", stream=io.BytesIO(b"col1,col2\nval1,val2")
-                ),
+                FileStorage(filename="test.csv", stream=io.BytesIO(b"col1,col2\nval1,val2")),
                 "test.csv",
             ),
         }

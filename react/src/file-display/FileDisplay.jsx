@@ -14,12 +14,8 @@ export default function FileDisplay({ loadedFile }) {
       <p className="text-sm italic">{loadedFile.path}</p>
       <p className="text-sm italic">{loadedFile.data_file_type} file</p>
       <TagDisplay tags={loadedFile.tags} />
-      {loadedFile.file_stats ? (
-        <FileStats fileStats={loadedFile.file_stats} />
-      ) : null}
-      {Array.isArray(loadedFile.data) && (
-        <DataTable data={loadedFile.data} />
-      )}
+      {loadedFile.file_stats ? <FileStats fileStats={loadedFile.file_stats} /> : null}
+      {Array.isArray(loadedFile.data) && <DataTable data={loadedFile.data} />}
     </div>
   );
 }

@@ -37,9 +37,7 @@ describe("Header", () => {
 
     it("displays attribution links", () => {
       cy.contains("button", "Attributions").click();
-      cy.contains("Visualization icons created by juicy_fish").should(
-        "be.visible"
-      );
+      cy.contains("Visualization icons created by juicy_fish").should("be.visible");
     });
   });
 });
