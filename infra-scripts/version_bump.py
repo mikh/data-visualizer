@@ -43,9 +43,7 @@ class Version:
         m = cls._PATTERN.match(text)
         if not m:
             ctx = f" (in {context})" if context else ""
-            raise ValueError(
-                f"Version '{text}'{ctx} does not match expected format X.Y.Z"
-            )
+            raise ValueError(f"Version '{text}'{ctx} does not match expected format X.Y.Z")
         return cls(int(m.group(1)), int(m.group(2)), int(m.group(3)))
 
     def bump(self, level: str) -> "Version":
@@ -116,9 +114,7 @@ def load_config(config_path: pathlib.Path) -> dict[str, Target]:
     for name, target in targets.items():
         for dep in target.depends_on:
             if dep not in targets:
-                errors.append(
-                    f"Target '{name}' depends on '{dep}' which is not defined in config"
-                )
+                errors.append(f"Target '{name}' depends on '{dep}' which is not defined in config")
 
     if errors:
         for e in errors:
@@ -169,9 +165,7 @@ def parse_bump_args(bump_csv: str, targets: dict[str, Target]) -> dict[str, str]
         token = token.strip()
         parts = token.split("-", maxsplit=1)
         if len(parts) != 2 or not parts[0] or not parts[1]:
-            errors.append(
-                f"Invalid bump specifier '{token}'. Expected <level>-<target>"
-            )
+            errors.append(f"Invalid bump specifier '{token}'. Expected <level>-<target>")
             continue
 
         level, name = parts
@@ -214,9 +208,7 @@ def read_version(target: Target) -> Version:
     if target.type == "helm-appversion":
         raw = data.get("appVersion")
         if raw is None:
-            print(
-                f"ERROR: No 'appVersion' field found in {target.path}", file=sys.stderr
-            )
+            print(f"ERROR: No 'appVersion' field found in {target.path}", file=sys.stderr)
             sys.exit(1)
         return Version.parse(str(raw), context)
 
@@ -303,9 +295,7 @@ def apply_all_writes(
 
 def build_parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser."""
-    parser = argparse.ArgumentParser(
-        description="Bump version numbers across multiple files."
-    )
+    parser = argparse.ArgumentParser(description="Bump version numbers across multiple files.")
     parser.add_argument(
         "--bump",
         default=None,
@@ -357,9 +347,7 @@ def list_versions(targets: dict[str, Target], topo_order: list[str]) -> None:
         print(f"  {name}: {version}  [{target.type}]{deps}")
 
 
-def _git(
-    *cmd: str, cwd: pathlib.Path | None = None
-) -> subprocess.CompletedProcess[str]:
+def _git(*cmd: str, cwd: pathlib.Path | None = None) -> subprocess.CompletedProcess[str]:
     """Run a git command and return the result."""
     return subprocess.run(
         ["git", *cmd],
@@ -370,9 +358,7 @@ def _git(
     )
 
 
-def read_version_from_ref(
-    target: Target, ref: str, repo_root: pathlib.Path
-) -> Version | None:
+def read_version_from_ref(target: Target, ref: str, repo_root: pathlib.Path) -> Version | None:
     """Read a target's version from a git ref.
 
     Returns None if the file doesn't exist on that ref.
@@ -424,7 +410,9 @@ def compare_to_branch(targets: dict[str, Target], branch: str) -> None:
     remotes = [r for r in result.stdout.strip().splitlines() if r]
     for remote in remotes:
         if f"{remote}/{current_branch}" == branch:
-            print(f"Current branch '{current_branch}' matches target '{branch}', nothing to compare.")
+            print(
+                f"Current branch '{current_branch}' matches target '{branch}', nothing to compare."
+            )
             return
 
     # Get repo root for relative path computation
@@ -450,8 +438,7 @@ def compare_to_branch(targets: dict[str, Target], branch: str) -> None:
         print(f"\nVersion check passed: {', '.join(incremented)} incremented.")
     else:
         print(
-            "\nERROR: No versions were incremented compared to "
-            f"branch '{branch}'.",
+            f"\nERROR: No versions were incremented compared to branch '{branch}'.",
             file=sys.stderr,
         )
         sys.exit(1)
