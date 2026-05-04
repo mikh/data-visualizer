@@ -281,7 +281,7 @@ def apply_all_writes(
 
     for file_path, updates in by_file.items():
         if all(t.type == "version" for t, _ in updates):
-            _, new_ver = updates[0]
+            _, new_ver = max(updates, key=lambda x: x[1].as_tuple())
             file_path.write_text(str(new_ver) + "\n", encoding="utf-8")
         else:
             text = file_path.read_text(encoding="utf-8")
@@ -399,21 +399,14 @@ def compare_to_branch(targets: dict[str, Target], branch: str) -> None:
         print(f"ERROR: Branch '{branch}' does not exist.", file=sys.stderr)
         sys.exit(1)
 
-    # Check if current branch is the same as target (directly or via remote)
-    result = _git("rev-parse", "--abbrev-ref", "HEAD")
-    current_branch = result.stdout.strip()
-    if current_branch == branch:
-        print(f"Current branch is '{branch}', nothing to compare.")
+    # Check if current HEAD is the same commit as the target branch.
+    # Comparing SHAs handles detached HEAD (e.g. GitLab CI), local branches,
+    # and remote refs uniformly.
+    head_sha = _git("rev-parse", "HEAD").stdout.strip()
+    target_sha = _git("rev-parse", branch).stdout.strip()
+    if head_sha and target_sha and head_sha == target_sha:
+        print(f"Current HEAD matches '{branch}', nothing to compare.")
         return
-
-    result = _git("remote")
-    remotes = [r for r in result.stdout.strip().splitlines() if r]
-    for remote in remotes:
-        if f"{remote}/{current_branch}" == branch:
-            print(
-                f"Current branch '{current_branch}' matches target '{branch}', nothing to compare."
-            )
-            return
 
     # Get repo root for relative path computation
     result = _git("rev-parse", "--show-toplevel")
